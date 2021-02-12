@@ -7,10 +7,6 @@ states, each of which can take on values from some set (Jurafsky & Martin, 2020)
 
 ### Works Cited
 
-*https://www.researchgate.net/profile/Valerio_Parisi/publication/228643141_Hidden_Markov_Models_in_Bioinformatics/links/09e4150633a767290f000000.pdfDaniel
-
-*Jurafsky, and James Martin. Speech and Language Processing. , 30 Dec. 2020.
-
-*Eddy, Sean R. Multiple Alignment Using Hidden Markov Models. , 1995.
-
-*Zahn, Hans, et al. “Scalable Whole-Genome Single-Cell Library Preparation without           Preamplification.” Nature Methods, vol. 14, no. 2, 1 Feb. 2017, pp. 167–173,              pubmed.ncbi.nlm.nih.gov/28068316/, 10.1038/nmeth.4140. Accessed 11 Feb. 2021.
+-Jurafsky, and James Martin. Speech and Language Processing. , 30 Dec. 2020.
+-Eddy, Sean R. Multiple Alignment Using Hidden Markov Models. , 1995.
+-Zahn, Hans, et al. “Scalable Whole-Genome Single-Cell Library Preparation without           Preamplification.” Nature Methods, vol. 14, no. 2, 1 Feb. 2017, pp. 167–173,              pubmed.ncbi.nlm.nih.gov/28068316/, 10.1038/nmeth.4140. Accessed 11 Feb. 2021.
