@@ -14,3 +14,22 @@ Supplementary notes: https://static-content.springer.com/esm/art%3A10.1038%2Fnme
 #### https://arxiv.org/pdf/1905.02939.pdf
 
 - Section 7.5
+
+### HMMcopy
+
+```angular2html
+vignette("HMMcopy")
+```
+
+vignette has useful info on copy number inference
+
+
+### Hidden Markov Models in Bioinformatics
+
+#### https://www.researchgate.net/profile/Valerio-Parisi/publication/228643141_Hidden_Markov_Models_in_Bioinformatics/links/09e4150633a767290f000000/Hidden-Markov-Models-in-Bioinformatics.pdf
+
+
+
+### Data Source
+
+#### https://www.cell.com/cell/pdf/S0092-8674(19)31176-6.pdf
