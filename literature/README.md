@@ -28,7 +28,9 @@ vignette has useful info on copy number inference
 
 #### https://www.researchgate.net/profile/Valerio-Parisi/publication/228643141_Hidden_Markov_Models_in_Bioinformatics/links/09e4150633a767290f000000/Hidden-Markov-Models-in-Bioinformatics.pdf
 
+### Imputation methods
 
+#### https://www.researchgate.net/publication/308921517_Missing_Value_Imputation_for_RNA-Sequencing_Data_Using_Statistical_Models_A_Comparative_Study
 
 ### Data Source
 

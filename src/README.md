@@ -5,6 +5,11 @@
     - create matrix with a single row representing chromosome, columns representing bins and values are read counts
     
 
+## Ideas
+
+- Find different ways of performing imputation
+
+
 ## Notes
 
 - We don't know the transition probabilities and emission probabilities, 
