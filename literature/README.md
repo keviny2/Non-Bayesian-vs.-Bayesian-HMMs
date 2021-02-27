@@ -35,3 +35,10 @@ vignette has useful info on copy number inference
 ### Data Source
 
 #### https://www.cell.com/cell/pdf/S0092-8674(19)31176-6.pdf
+
+
+https://link.springer.com/article/10.1186/s12859-019-3266-7#:~:text=The%20number%20of%20reads%20mapped,on%20the%20paired%2Dend%20reads.
+- read number is proportional to the DNA copy number
+
+https://www.biorxiv.org/content/10.1101/696179v2.full#ref-61
+- emission and transition probabilities follow a distribution
