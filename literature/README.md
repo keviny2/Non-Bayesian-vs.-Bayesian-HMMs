@@ -1,44 +1,56 @@
 ## List of Relevant Papers 
 
-### Scalable whole-genome single-cell library preparation without preamplification
+### Introduction
+____________________________________
 
-#### https://www.nature.com/articles/nmeth.4140#Sec8
-
+#### Scalable whole-genome single-cell library preparation without preamplification
+- https://www.nature.com/articles/nmeth.4140#Sec8
 - Single-cell copy-number inference section
 
-Supplementary notes: https://static-content.springer.com/esm/art%3A10.1038%2Fnmeth.4140/MediaObjects/41592_2017_BFnmeth4140_MOESM175_ESM.pdf
+#### Supplementary notes
+- https://static-content.springer.com/esm/art%3A10.1038%2Fnmeth.4140/MediaObjects/41592_2017_BFnmeth4140_MOESM175_ESM.pdf
 - Single-cell copy-number inference on pg.33   
 
-### Non-Reversible Parallel Tempering: a Scalable Highly Parallel MCMC Scheme
-
-#### https://arxiv.org/pdf/1905.02939.pdf
-
+#### Non-Reversible Parallel Tempering: a Scalable Highly Parallel MCMC Scheme
+- https://arxiv.org/pdf/1905.02939.pdf
 - Section 7.5
 
-### HMMcopy
+#### Copy number alterations detection methods on sequencing data
+https://link.springer.com/article/10.1186/s12859-019-3266-7#:~:text=The%20number%20of%20reads%20mapped,on%20the%20paired%2Dend%20reads.
+- read number is proportional to the DNA copy number
+
+
+### HMM
+____________________________________
+
+#### HMMcopy
 
 ```angular2html
 vignette("HMMcopy")
 ```
 
-vignette has useful info on copy number inference
+
+#### Hidden Markov Models in Bioinformatics
+- https://www.researchgate.net/profile/Valerio-Parisi/publication/228643141_Hidden_Markov_Models_in_Bioinformatics/links/09e4150633a767290f000000/Hidden-Markov-Models-in-Bioinformatics.pdf
 
 
-### Hidden Markov Models in Bioinformatics
+https://www.biorxiv.org/content/10.1101/696179v2.full#ref-61
+- emission and transition probabilities follow a distribution
 
-#### https://www.researchgate.net/profile/Valerio-Parisi/publication/228643141_Hidden_Markov_Models_in_Bioinformatics/links/09e4150633a767290f000000/Hidden-Markov-Models-in-Bioinformatics.pdf
+http://www.utstat.toronto.edu/~rsalakhu/sta4273/notes/Lecture11.pdf
+- Gaussian emission model 
+
 
 ### Imputation methods
-
+______________________________________
 #### https://www.researchgate.net/publication/308921517_Missing_Value_Imputation_for_RNA-Sequencing_Data_Using_Statistical_Models_A_Comparative_Study
 
 ### Data Source
+______________________________________
 
 #### https://www.cell.com/cell/pdf/S0092-8674(19)31176-6.pdf
 
 
-https://link.springer.com/article/10.1186/s12859-019-3266-7#:~:text=The%20number%20of%20reads%20mapped,on%20the%20paired%2Dend%20reads.
-- read number is proportional to the DNA copy number
 
-https://www.biorxiv.org/content/10.1101/696179v2.full#ref-61
-- emission and transition probabilities follow a distribution
+
+
