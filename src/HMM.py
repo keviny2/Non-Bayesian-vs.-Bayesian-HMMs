@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 from Distribution import normal_pdf
 from SimulateData import SimulateData
@@ -102,9 +101,22 @@ class HMM:
 
 
     def baum_welch_continuous(self, A, B, initial, n_iter=100):
+        """
+
+        :param A: state transition matrix
+        :param B: [[mu1,sigma1],
+                   [mu2,sigma2],
+                    ....]
+        :param initial: initial probabilities
+        :param n_iter: number of iterations
+        :return: updated state transition and emission matrices
+        """
         num_states = A.shape[0]
         T = len(self.observations)
 
+        # BUG: after running for many iterations either:
+        #  1. the matrix becomes symmetric (shouldn't do this)
+        #  2. nan values show up
         for n in range(n_iter):
             alpha = self.forward_continuous(A, B, initial)
             beta = self.backward_continuous(A, B)
@@ -122,14 +134,13 @@ class HMM:
             # Add additional T'th element in gamma
             gamma = np.hstack((gamma, np.sum(xi[:, :, T - 2], axis=0).reshape((-1, 1))))
 
-            # continuous case
-            # B = [[mu1,sigma1], [mu2,sigma2], ....]
+            # formulas from U of T lecture slides:
+            # http://www.utstat.toronto.edu/~rsalakhu/sta4273/notes/Lecture11.pdf
             K = B.shape[0]
             for l in range(K):
                 denominator = np.sum(gamma[l, :])
                 new_mu = np.dot(gamma[l, :], self.observations)
                 new_sigma = np.dot(gamma[l, :], np.square(self.observations - B[l][1]))
-                # new_sigma = np.dot((gamma[l, :] * self.observations - B[l][1]), self.observations - B[l][1])
                 B[l, :] = [new_mu, new_sigma] / denominator
 
 
