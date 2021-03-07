@@ -37,5 +37,5 @@ transition = pd.DataFrame(transition_matrix, columns = hidden_states, index = hi
 emission_matrix = np.array([[1, 0], [0.8,0.2], [0.3,0.7]])
 emission = pd.DataFrame(emission_matrix, columns = obs_states,index = hidden_states)
 
-path, prob, state = function.viterbi(pi, transition_matrix, emission_matrix,obs )
+path, prob, state = function.viterbi(pi, transition_matrix, emission_matrix, obs)
 print(path, prob, state)
