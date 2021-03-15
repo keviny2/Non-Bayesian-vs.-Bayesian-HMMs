@@ -38,6 +38,7 @@ https://www.biorxiv.org/content/10.1101/696179v2.full#ref-61
 - emission and transition probabilities follow a distribution
 
 http://www.utstat.toronto.edu/~rsalakhu/sta4273/notes/Lecture11.pdf
+
 https://www.inf.ed.ac.uk/teaching/courses/asr/2016-17/asr03-hmmgmm-handout.pdf
 - Gaussian emission model 
 - Z_nk is latent state at time n and it being equal to hidden state k
