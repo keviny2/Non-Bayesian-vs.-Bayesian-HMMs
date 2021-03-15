@@ -41,6 +41,9 @@ http://www.utstat.toronto.edu/~rsalakhu/sta4273/notes/Lecture11.pdf
 - Gaussian emission model 
 - Z_nk is latent state at time n and it being equal to hidden state k
 
+#### KDE and HMM
+- https://arxiv.org/pdf/1807.11320.pdf
+
 
 ### Imputation methods
 ______________________________________
