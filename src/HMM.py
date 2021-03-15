@@ -146,6 +146,56 @@ class HMM:
 
         return {"a": A, "b": B}
 
+    def baum_welch_alternative(self, A, B, initial):
+
+        num_states = np.shape(A)[0]
+        T = len(self.observations)
+        converge = False
+        loglik_prev = - np.inf
+
+        while not converge:
+            alpha = self.forward_continuous(A, B, initial)
+            beta = self.backward_continuous(A, B)
+
+            gamma = np.zeros((T, num_states))
+            for i in range(num_states):
+                gamma[i] = alpha[i] * beta[i] / sum(alpha[i] * beta[i])
+
+            xi = np.zeros((num_states, num_states, T-1))
+            for i in range(T-1):
+                for j in range(num_states):
+                    for k in range(num_states):
+                        xi[k, j, i] = alpha[i, j] * beta[i+1, k] * A[k, j] * normal_pdf(self.observations[i+1], B[k, 0], B[k, 1])
+                xi[:, :, i] = xi[:, :, i] / sum(xi[:, :, i])
+
+            initial = gamma[1]
+
+            for i in range(num_states):
+                for j in range(num_states):
+                    A[i, j] = np.sum(xi, axis = 0)[i, j] / np.sum(np.sum(xi, axis = 0), axis = 0)
+
+            for i in range(num_states):
+                B[i, 0] = gamma[:, i] @ self.observations / np.sum(gamma[:, i])
+                B[i, 1] = gamma[:, i] @ (self.observations - B[i, 0])**2 / np.sum(gamma[:, i])
+
+            loglik_new = initial @ np.log(initial)
+
+            for i in range(T-1):
+                for j in range(num_states):
+                    for k in range(num_states):
+                        loglik_new += xi[j, k, i] * np.log(A[j, k])
+
+            for i in range(len(self.observations)):
+                for j in range(num_states):
+                    loglik_new += gamma[i, j] * np.log(normal_pdf(self.observations[i], B[j, 0], B[j, 1]))
+
+            if (np.abs(loglik_new - loglik_prev) < 1e-6):
+                converge = True
+            else:
+                loglik_prev = loglik_new
+
+        return A, B
+
 
     def viterbi(self, pi, transition, emission, obs):
         hidden = np.shape(emission)[0]
@@ -167,6 +217,33 @@ class HMM:
 
                 prob[j,i] = np.max(prob[:, i-1] * transition[:, j] * emission[j, obs[i]])
                 state[j,i] = np.argmax(prob[:, i-1] * transition[:, j] * emission[j, obs[i]])
+
+        path[d-1] = np.argmax(prob[:, d-1])
+        for i in range(d-2, -1, -1):
+            path[i] = state[path[i+1], [i+1]]
+
+        return path, prob, state
+
+    def viterbi_continuous(self, pi, transition, emission, obs):
+        hidden = np.shape(emission)[0]
+        d = np.shape(obs)[0]
+
+        # init blank path
+        path = np.zeros(d, dtype = int)
+        #  highest probability of any path that reaches state i
+        prob = np.zeros((hidden, d))
+        # the state with the highest probability
+        state = np.zeros((hidden, d))
+
+         # init delta and phi
+        prob[:, 0] = pi * emission[:, obs[0]]
+        state[:, 0] = 0
+
+        for i in range(1, d, 1):
+            for j in range(hidden):
+
+                prob[j,i] = np.max(prob[:, i-1] * transition[:, j] * normal_pdf(obs[d], emission[j, 0], emission[j, 1]))
+                state[j,i] = np.argmax(prob[:, i-1] * transition[:, j] * normal_pdf(obs[d], emission[j, 0], emission[j, 1]))
 
         path[d-1] = np.argmax(prob[:, d-1])
         for i in range(d-2, -1, -1):
