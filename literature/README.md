@@ -33,6 +33,11 @@ vignette("HMMcopy")
 #### Hidden Markov Models in Bioinformatics
 - https://www.researchgate.net/profile/Valerio-Parisi/publication/228643141_Hidden_Markov_Models_in_Bioinformatics/links/09e4150633a767290f000000/Hidden-Markov-Models-in-Bioinformatics.pdf
 
+#### Fast MCMC sampling for HMM
+https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-428
+
+#### Bayesian methods for HMM
+https://www-tandfonline-com.ezproxy.library.ubc.ca/doi/pdf/10.1198/016214502753479464?needAccess=true
 
 https://www.biorxiv.org/content/10.1101/696179v2.full#ref-61
 - emission and transition probabilities follow a distribution
