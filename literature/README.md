@@ -1,6 +1,6 @@
 ## List of Relevant Papers 
 
-### Introduction
+### Background
 ____________________________________
 
 #### Scalable whole-genome single-cell library preparation without preamplification
@@ -20,6 +20,20 @@ https://link.springer.com/article/10.1186/s12859-019-3266-7#:~:text=The%20number
 - read number is proportional to the DNA copy number
 
 
+### Bayesian HMM
+------------------------------------
+#### M. Kowgier's Thesis
+https://tspace.library.utoronto.ca/bitstream/1807/32794/1/kowgier_matthew_201206_PhD_thesis.pdf
+- maximum copy number is in {0,1,2,3,4,5} ~ pg.68
+
+#### Fast MCMC sampling for HMM
+https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-428
+
+#### Bayesian methods for HMM
+https://www-tandfonline-com.ezproxy.library.ubc.ca/doi/pdf/10.1198/016214502753479464?needAccess=true
+
+
+
 ### HMM
 ____________________________________
 
@@ -29,15 +43,8 @@ ____________________________________
 vignette("HMMcopy")
 ```
 
-
 #### Hidden Markov Models in Bioinformatics
 - https://www.researchgate.net/profile/Valerio-Parisi/publication/228643141_Hidden_Markov_Models_in_Bioinformatics/links/09e4150633a767290f000000/Hidden-Markov-Models-in-Bioinformatics.pdf
-
-#### Fast MCMC sampling for HMM
-https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-428
-
-#### Bayesian methods for HMM
-https://www-tandfonline-com.ezproxy.library.ubc.ca/doi/pdf/10.1198/016214502753479464?needAccess=true
 
 https://www.biorxiv.org/content/10.1101/696179v2.full#ref-61
 - emission and transition probabilities follow a distribution
