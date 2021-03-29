@@ -25,6 +25,7 @@ https://link.springer.com/article/10.1186/s12859-019-3266-7#:~:text=The%20number
 #### M. Kowgier's Thesis
 https://tspace.library.utoronto.ca/bitstream/1807/32794/1/kowgier_matthew_201206_PhD_thesis.pdf
 - maximum copy number is in {0,1,2,3,4,5} ~ pg.68
+- high prob. for remaining at same state, low prob. for transitioning to new state
 
 #### Fast MCMC sampling for HMM
 https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-428

@@ -2,7 +2,7 @@ import numpy as np
 from Distribution import normal_pdf
 from SimulateData import SimulateData
 
-class HMM:
+class MaxLikeHMM:
 
     def __init__(self, observations=None):
         """
