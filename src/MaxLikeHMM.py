@@ -256,7 +256,7 @@ if __name__ == '__main__':
     simulate = SimulateData()
     observations, A, B, initial = simulate.simulate_data(continuous=True)
     initial = [0.5, 0.5]
-    HMM = HMM(observations)
+    HMM = MaxLikeHMM(observations)
     res = HMM.baum_welch_continuous(A, B, initial)
     res
 
