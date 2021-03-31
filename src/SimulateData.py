@@ -17,26 +17,32 @@ class SimulateData:
 
     def simulate_continuous(self, state_transition, emission_prob, initial_state, num_obs):
         if state_transition is None:
-            state_transition = np.array([[0.3, 0.7],[0.6, 0.4]])
+            state_transition = np.array([[0.8, 0.1, 0.1],
+                                         [0.05, 0.85, 0.1],
+                                         [0.05, 0.05, 0.9]])
 
         if emission_prob is None:
-            emission_prob = np.array([[1, 0.5],[2, 0.5]])
+            emission_prob = np.array([[0, 0.5],
+                                      [1, 0.5],
+                                      [2, 0.5]])
 
         if initial_state is None:
-            initial_state = np.array([1, 0, 0])
+            initial_state = np.array([1/3, 1/3, 1/3])
 
         observations = np.zeros(num_obs)
+        state_path = np.zeros(num_obs)
         curr_state = np.argmax(np.random.multinomial(1, initial_state, 1))
         for i in range(num_obs):
+            state_path[i] = curr_state
             observations[i] = np.random.normal(emission_prob[curr_state, 0], emission_prob[curr_state, 1])
             curr_state = np.argmax(np.random.multinomial(1, state_transition[curr_state, :]))
 
         # generate random initialization
-        A = self.generate_state_transition_matrix(state_transition.shape[0], state_transition.shape[1])
-        B = self.generate_emision_matrix(emission_prob.shape[0], emission_prob.shape[1])
+        A = self.generate_random_state_transition_matrix(state_transition.shape[0], state_transition.shape[1])
+        B = self.generate_random_emission_matrix(emission_prob.shape[0], emission_prob.shape[1])
         initial = np.zeros(state_transition.shape[0])
         initial[0] = 1
-        return observations, A, B, initial
+        return observations, state_path, A, B, initial
 
     def simulate_discrete(self):
 
@@ -58,7 +64,7 @@ class SimulateData:
 
         return obs, A, B, pi
 
-    def generate_state_transition_matrix(self, nrow, ncol):
+    def generate_random_state_transition_matrix(self, nrow, ncol):
         x = np.random.random((nrow, ncol))
 
         rsum = None
@@ -72,7 +78,7 @@ class SimulateData:
 
         return x
 
-    def generate_emision_matrix(self, nrow, ncol):
+    def generate_random_emission_matrix(self, nrow, ncol):
         initial = np.random.normal(1, 0.5)
         emission_matrix = np.zeros((nrow, ncol))
         for row in range(nrow):
