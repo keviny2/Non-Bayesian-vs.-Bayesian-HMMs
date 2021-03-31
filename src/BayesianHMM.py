@@ -98,7 +98,7 @@ class BayesianHMM:
     def sample_sigma_invsq(self):
         mean_vec = [self.mu[int(state)] for state in self.state_path]
         self.sigma_invsq = np.random.gamma(self.alpha + 0.5*self.num_obs,
-                                           self.beta + 0.5*np.sum(self.observations-mean_vec))
+                                           self.beta + 0.5*np.sum((self.observations-mean_vec)**2))
 
 
     def sample_beta(self):
@@ -107,10 +107,13 @@ class BayesianHMM:
 
     def sample_A(self):
         for i in range(self.num_states):
-            # create array of only X_k (because we don't need X_{k-1}) and finding n_ij's that way
+            # find indices of states that come right after state i
+            indices = np.where(self.state_path == i)[0] + 1 # indices of X_k
 
-            # BUG: index out of bound due to the +1
-            indices = np.where(self.state_path == i)[0] + 1  # indices of X_k
+            # need to address the case for the last state in the sequence
+            if self.num_obs in indices:
+                indices = np.delete(indices, np.where(indices == self.num_obs))
+
             states = self.state_path[indices]
             n_i = np.zeros(self.num_states)
             for j in range(self.num_states):
@@ -121,7 +124,7 @@ class BayesianHMM:
         alpha = np.zeros(self.num_states)
         for i in range(self.num_states):
             alpha[i] = np.count_nonzero(self.state_path == i)
-        self.initial_dist = alpha
+        self.initial_dist = np.random.dirichlet(alpha)
 
     def sample_states(self):
         pass
