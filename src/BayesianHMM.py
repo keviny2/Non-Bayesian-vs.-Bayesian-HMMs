@@ -1,5 +1,6 @@
 import numpy as np
 from SimulateData import SimulateData
+from Distribution import normal_pdf
 
 class BayesianHMM:
 
@@ -53,8 +54,8 @@ class BayesianHMM:
         alpha = 2
         g = 0.2
         h = 10/R**2
-        beta = np.random.gamma(shape=g, scale=h)
-        sigma_invsq = np.random.gamma(shape=alpha, scale=beta)
+        beta = np.random.gamma(shape=g, scale=1/h)
+        sigma_invsq = np.random.gamma(shape=alpha, scale=1/beta)
 
         # set hmm model parameter class variables
         self.initial_dist = initial_dist
@@ -96,14 +97,14 @@ class BayesianHMM:
 
 
     def sample_sigma_invsq(self):
-        mean_vec = [self.mu[int(state)] for state in self.state_path]
+        mus = [self.mu[int(state)] for state in self.state_path]
         self.sigma_invsq = np.random.gamma(self.alpha + 0.5*self.num_obs,
-                                           self.beta + 0.5*np.sum((self.observations-mean_vec)**2))
+                                           1/(self.beta + 0.5*np.sum((self.observations-mus)**2)))
 
 
     def sample_beta(self):
         self.beta = np.random.gamma(self.g + self.alpha,
-                                    self.h + self.sigma_invsq)
+                                    1/(self.h + self.sigma_invsq))
 
     def sample_A(self):
         for i in range(self.num_states):
@@ -127,7 +128,23 @@ class BayesianHMM:
         self.initial_dist = np.random.dirichlet(alpha)
 
     def sample_states(self):
-        pass
+        # sample X1
+        beta = self.backward_continuous()
+
+
+
+    def backward_continuous(self):
+        beta = np.zeros((self.num_obs, self.num_states))
+
+        # setting beta(T) = 1
+        beta[self.observations.shape[0] - 1] = np.ones((self.num_states))
+
+        # Loop in backward way from T-1 to
+        # Due to python indexing the actual loop will be T-2 to 0
+        for t in range(self.num_obs - 2, -1, -1):
+            for j in range(self.num_states):
+                beta[t, j] = (beta[t + 1] * normal_pdf(self.observations[t + 1], self.mu[j], np.sqrt(1/self.sigma_invsq))).dot(self.A[j, :])
+        return beta
 
 
 if __name__ == '__main__':
