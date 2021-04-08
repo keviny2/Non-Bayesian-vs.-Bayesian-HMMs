@@ -100,51 +100,159 @@ class MaxLikeHMM:
         return {"a": A, "b": B}
 
 
-    def baum_welch_continuous(self, A, B, initial, n_iter=100):
-        """
+    # def baum_welch_continuous(self, A, B, initial, n_iter=100):
+    #     """
+    #
+    #     :param A: state transition matrix
+    #     :param B: [[mu1,sigma1],
+    #                [mu2,sigma2],
+    #                 ....]
+    #     :param initial: initial probabilities
+    #     :param n_iter: number of iterations
+    #     :return: updated state transition and emission matrices
+    #     """
+    #     num_states = A.shape[0]
+    #     T = len(self.observations)
+    #
+    #     # BUG: after running for many iterations either:
+    #     #  1. the matrix becomes symmetric (shouldn't do this)
+    #     #  2. nan values show up
+    #     for n in range(n_iter):
+    #         alpha = self.forward_continuous(A, B, initial)
+    #         beta = self.backward_continuous(A, B)
+    #
+    #         xi = np.zeros((num_states, num_states, T - 1))
+    #         for t in range(T - 1):
+    #             denominator = np.dot(np.dot(alpha[t, :].T, A) * np.array([normal_pdf(self.observations[t + 1], B[state, 0], B[state, 1]) for state in range(num_states)]).T, beta[t + 1, :])
+    #             for i in range(num_states):
+    #                 numerator = alpha[t, i] * A[i, :] * np.array([normal_pdf(self.observations[t + 1], B[state, 0], B[state, 1]) for state in range(num_states)]).T * beta[t + 1, :].T
+    #                 xi[i, :, t] = numerator / denominator
+    #
+    #         gamma = np.sum(xi, axis=1)
+    #         A = np.sum(xi, 2) / np.sum(gamma, axis=1).reshape((-1, 1))
+    #
+    #         # Add additional T'th element in gamma
+    #         gamma = np.hstack((gamma, np.sum(xi[:, :, T - 2], axis=0).reshape((-1, 1))))
+    #
+    #         # formulas from U of T lecture slides:
+    #         # http://www.utstat.toronto.edu/~rsalakhu/sta4273/notes/Lecture11.pdf
+    #         K = B.shape[0]
+    #         for l in range(K):
+    #             denominator = np.sum(gamma[l, :])
+    #             new_mu = np.dot(gamma[l, :], self.observations)
+    #             new_sigma = np.dot(gamma[l, :], np.square(self.observations - B[l][1]))
+    #             B[l, :] = [new_mu, new_sigma] / denominator
+    #
+    #
+    #     return {"a": A, "b": B}
 
-        :param A: state transition matrix
-        :param B: [[mu1,sigma1],
-                   [mu2,sigma2],
-                    ....]
-        :param initial: initial probabilities
-        :param n_iter: number of iterations
-        :return: updated state transition and emission matrices
-        """
+    def eexp(self, x):
+        if x == None:
+            return 0
+        else:
+            return np.exp(x)
+
+    def eln(self,x):
+        try:
+            if x == 0:
+                return None
+            elif x > 0:
+                return np.log(x)
+        except ValueError:
+            print("negative input error")
+            raise ValueError
+
+
+    def elnsum(self, x, y):
+        if x== None or y == None:
+            if x == None:
+                return y
+            else:
+                return x
+
+        else:
+            if x > y:
+                return x + self.eln(1+np.exp(y - x))
+            else:
+                return y + self.eln(1+np.exp(x - y))
+
+    def elnproduct(self, x, y):
+        if x == None or y == None:
+            return None
+        else:
+            return x + y
+
+    def forward_robust(self, A, B, initial):
         num_states = A.shape[0]
-        T = len(self.observations)
+        num_observed = self.observations.shape[0]
+        alpha = np.zeros((num_observed, num_states))  # store values for previous alphas
+        for i in range(num_states):
+            alpha[0, i] = self.elnproduct(self.eln(initial[i]), self.eln(normal_pdf(self.observations[0], B[i, 0], B[i, 1])))
 
-        # BUG: after running for many iterations either:
-        #  1. the matrix becomes symmetric (shouldn't do this)
-        #  2. nan values show up
-        for n in range(n_iter):
-            alpha = self.forward_continuous(A, B, initial)
-            beta = self.backward_continuous(A, B)
-
-            xi = np.zeros((num_states, num_states, T - 1))
-            for t in range(T - 1):
-                denominator = np.dot(np.dot(alpha[t, :].T, A) * np.array([normal_pdf(self.observations[t + 1], B[state, 0], B[state, 1]) for state in range(num_states)]).T, beta[t + 1, :])
+        for t in range(1, num_observed):
+            for j in range(num_states):
+                logalpha = None
                 for i in range(num_states):
-                    numerator = alpha[t, i] * A[i, :] * np.array([normal_pdf(self.observations[t + 1], B[state, 0], B[state, 1]) for state in range(num_states)]).T * beta[t + 1, :].T
-                    xi[i, :, t] = numerator / denominator
+                    logalpha = self.elnsum(logalpha, self.elnproduct(alpha[t-1, i], self.eln(A[i, j])))
+                alpha[t, j] = self.elnproduct(logalpha, self.eln(normal_pdf(self.observations[t], B[j, 0], B[j, 1])))
 
-            gamma = np.sum(xi, axis=1)
-            A = np.sum(xi, 2) / np.sum(gamma, axis=1).reshape((-1, 1))
+        self.alpha = alpha
+        return alpha
 
-            # Add additional T'th element in gamma
-            gamma = np.hstack((gamma, np.sum(xi[:, :, T - 2], axis=0).reshape((-1, 1))))
+    def backward_robust(self, A, B):
+        num_states = A.shape[0]
+        num_observed = self.observations.shape[0]
+        beta = np.zeros((num_observed, num_states))
 
-            # formulas from U of T lecture slides:
-            # http://www.utstat.toronto.edu/~rsalakhu/sta4273/notes/Lecture11.pdf
-            K = B.shape[0]
-            for l in range(K):
-                denominator = np.sum(gamma[l, :])
-                new_mu = np.dot(gamma[l, :], self.observations)
-                new_sigma = np.dot(gamma[l, :], np.square(self.observations - B[l][1]))
-                B[l, :] = [new_mu, new_sigma] / denominator
+        beta[self.observations.shape[0] - 1] = np.zeros(num_states)
+        for t in range(num_observed - 2, -1, -1):
+            for i in range(num_states):
+                logbeta = None
+                for j in range(num_states):
+                    logbeta = self.elnsum(logbeta, self.elnproduct(self.eln(A[j, i]),
+                                                                   self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])), beta[t+1, j])))
+                beta[t, i] = logbeta
 
 
-        return {"a": A, "b": B}
+        self.beta = beta
+        return beta
+
+
+    def gamma_robust(self, A):
+        num_states = A.shape[0]
+        num_observed = self.observations.shape[0]
+
+        gamma = np.zeros((num_observed, num_states))
+        for t in range(num_observed):
+            normalizer = None
+            for i in range(num_states):
+                gamma[t, i] = self.elnproduct(self.alpha[t, i], self.beta[t, i])
+                normalizer = self.elnsum(normalizer, gamma[t,i])
+
+            for i in range(num_observed):
+                gamma[t, i] = self.elnproduct(gamma[t, i], -normalizer)
+
+        return gamma
+
+
+    def xi_robust(self, A, B, initial):
+        num_states = A.shape[0]
+        num_observed = self.observations.shape[0]
+
+        xi = np.zeros((num_states, num_states, num_observed-1))
+        for t in range(num_observed-1):
+            normalizer = None
+            for i in range(num_states):
+                for j in range(num_states):
+                    xi[j, i, t] = self.elnproduct(self.alpha[t, i], self.elnproduct(self.eln(A[j, i]),
+                                                                                    self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])),
+                                                                                                    self.beta[t+1, j])))
+                    normalizer = self.elnsum(normalizer, xi[j, i, t])
+            for i in range(num_states):
+                for j in range(num_states):
+                    xi[j, i, t] = self.elnproduct(xi[j, i, t], -normalizer)
+
+        return xi
 
     def baum_welch_alternative(self, A, B, initial):
 
@@ -163,10 +271,12 @@ class MaxLikeHMM:
 
             xi = np.zeros((num_states, num_states, T-1))
             for i in range(T-1):
+                summation = 0
                 for j in range(num_states):
                     for k in range(num_states):
                         xi[k, j, i] = alpha[i, j] * beta[i+1, k] * A[k, j] * normal_pdf(self.observations[i+1], B[k, 0], B[k, 1])
-                xi[:, :, i] = xi[:, :, i] / sum(xi[:, :, i])
+                        summation += xi[k, j, i]
+                xi[:, :, i] = xi[:, :, i] / summation
 
             initial = gamma[1]
 
@@ -253,11 +363,11 @@ class MaxLikeHMM:
 
 if __name__ == '__main__':
 
-    simulate = SimulateData()
-    observations, state_path, A, B, initial = simulate.simulate_data(continuous=True)
-    initial = [0.5, 0.5]
-    HMM = MaxLikeHMM(observations)
-    res = HMM.baum_welch_continuous(A, B, initial)
-    res
+    # simulate = SimulateData()
+    # observations, state_path, A, B, initial = simulate.simulate_data(continuous=True)
+    # initial = [0.5, 0.5]
+    # HMM = MaxLikeHMM(observations)
+    # res = HMM.baum_welch_continuous(A, B, initial)
+    # res
 
     pass

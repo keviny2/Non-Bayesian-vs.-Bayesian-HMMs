@@ -2,13 +2,17 @@ import numpy as np
 import pandas as pd
 import random
 import matplotlib.pyplot as plt
+import BayesianHMM
+import MaxLikeHMM
+from hmmlearn import hmm
+from Distribution import normal_pdf
 
 
 A = np.array([[0.6, 0.3, 0.1], [0.1,0.8,0.1],[0.1,0.3,0.6]])
-print(A)
+
 
 mu = np.array([-2, 0, 2])
-print(mu)
+
 
 def marginal(A, init):
     return np.dot(A.T, init)
@@ -40,7 +44,6 @@ while not converge:
         init = update
     else:
         converge = True
-        print(update)
 init = np.array([0.2,0.6,0.2])
 
 random.seed(1)
@@ -48,14 +51,22 @@ state = np.zeros(1000)
 obs = np.zeros(1000)
 state[0] = generate_state(init, generate_num())
 obs[0] = generate_obs(state[0])
-print(int(state[0]))
 
 for i in np.arange(1, 1000):
     tran = A[int(state[i-1])]
     state[i] = generate_state(tran, generate_num())
     obs[i] = generate_obs(state[i])
 
-plt.plot(obs)
-plt.show()
-plt.plot(state)
-plt.show()
+# plt.plot(obs)
+# plt.show()
+# plt.plot(state)
+# plt.show()
+
+A = np.array([[0.6, 0.3, 0.1], [0.1,0.8,0.1],[0.1,0.3,0.6]])
+B = np.array([[-2, 1], [0, 1], [2, 1]])
+initial = init
+model = MaxLikeHMM.MaxLikeHMM(obs)
+np.set_printoptions(threshold=np.inf)
+
+obs_prime = np.argmax(model.forward_robust(A, B, initial), axis = 1)
+print(obs_prime == state)
