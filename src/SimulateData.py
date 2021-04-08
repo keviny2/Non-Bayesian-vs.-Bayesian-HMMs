@@ -40,9 +40,12 @@ class SimulateData:
         # generate random initialization
         A = self.generate_random_state_transition_matrix(state_transition.shape[0], state_transition.shape[1])
         B = self.generate_random_emission_matrix(emission_prob.shape[0], emission_prob.shape[1])
+        state_path_sim = self.generate_random_state_path(A.shape[0], num_obs)
+
         initial = np.zeros(state_transition.shape[0])
-        initial[0] = 1
-        return observations, state_path, A, B, initial
+        initial[0] = 1  # begin at the first state
+
+        return observations, state_path_sim, A, B, initial
 
     def simulate_discrete(self):
 
@@ -85,3 +88,7 @@ class SimulateData:
             emission_matrix[row, :] = [initial*(row+1), 0.5]
 
         return emission_matrix
+
+
+    def generate_random_state_path(self, num_states, num_obs):
+        return np.random.choice(np.arange(num_states), num_obs)

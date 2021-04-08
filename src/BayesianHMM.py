@@ -121,6 +121,7 @@ class BayesianHMM:
                 n_i[j] = np.count_nonzero(states == j)
             self.A[i, :] = np.random.dirichlet(n_i + 1)
 
+
     def sample_initial_dist(self):
         alpha = np.zeros(self.num_states)
         for i in range(self.num_states):
@@ -130,8 +131,6 @@ class BayesianHMM:
     def sample_states(self):
         # sample X1
         beta = self.backward_continuous()
-
-
 
     def backward_continuous(self):
         beta = np.zeros((self.num_obs, self.num_states))
@@ -143,15 +142,15 @@ class BayesianHMM:
         # Due to python indexing the actual loop will be T-2 to 0
         for t in range(self.num_obs - 2, -1, -1):
             for j in range(self.num_states):
-                beta[t, j] = (beta[t + 1] * normal_pdf(self.observations[t + 1], self.mu[j], np.sqrt(1/self.sigma_invsq))).dot(self.A[j, :])
+                beta[t, j] = (beta[t + 1] * normal_pdf(self.observations[t + 1],
+                                                       self.mu, np.sqrt(1/self.sigma_invsq))).dot(self.A[j, :])
         return beta
 
 
 if __name__ == '__main__':
-    # TODO: work on simulating data and initializing state path
     simulate = SimulateData()
     observations, state_path, A, B, initial = simulate.simulate_data(num_obs=int(1e4), continuous=True)
 
-    HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=3)
+    HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=A.shape[0])
     HMM.generate_priors()
     HMM.sample_parameters()
