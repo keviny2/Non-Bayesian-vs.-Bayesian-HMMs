@@ -9,6 +9,8 @@ class MaxLikeHMM:
 
         :param observations: vector of observations
         """
+
+        # TODO: clean up this file?
         self.observations = observations
 
     def forward(self, A, B, initial):
@@ -99,7 +101,7 @@ class MaxLikeHMM:
 
         return {"a": A, "b": B}
 
-
+    # TODO: implement Baum Welch with robust forward backward implementations?
     # def baum_welch_continuous(self, A, B, initial, n_iter=100):
     #     """
     #
@@ -114,9 +116,6 @@ class MaxLikeHMM:
     #     num_states = A.shape[0]
     #     T = len(self.observations)
     #
-    #     # BUG: after running for many iterations either:
-    #     #  1. the matrix becomes symmetric (shouldn't do this)
-    #     #  2. nan values show up
     #     for n in range(n_iter):
     #         alpha = self.forward_continuous(A, B, initial)
     #         beta = self.backward_continuous(A, B)
@@ -210,11 +209,12 @@ class MaxLikeHMM:
                 logbeta = None
                 for j in range(num_states):
                     logbeta = self.elnsum(logbeta, self.elnproduct(self.eln(A[j, i]),
-                                                                   self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])), beta[t+1, j])))
+                                                                   self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])),
+                                                                                   beta[t+1, j])))
                 beta[t, i] = logbeta
 
 
-        self.beta = beta
+        self.beta_max_like = beta
         return beta
 
 
@@ -226,7 +226,7 @@ class MaxLikeHMM:
         for t in range(num_observed):
             normalizer = None
             for i in range(num_states):
-                gamma[t, i] = self.elnproduct(self.alpha[t, i], self.beta[t, i])
+                gamma[t, i] = self.elnproduct(self.alpha[t, i], self.beta_max_like[t, i])
                 normalizer = self.elnsum(normalizer, gamma[t,i])
 
             for i in range(num_observed):
@@ -246,7 +246,7 @@ class MaxLikeHMM:
                 for j in range(num_states):
                     xi[j, i, t] = self.elnproduct(self.alpha[t, i], self.elnproduct(self.eln(A[j, i]),
                                                                                     self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])),
-                                                                                                    self.beta[t+1, j])))
+                                                                                                    self.beta_max_like[t + 1, j])))
                     normalizer = self.elnsum(normalizer, xi[j, i, t])
             for i in range(num_states):
                 for j in range(num_states):
