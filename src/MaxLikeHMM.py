@@ -214,7 +214,7 @@ class MaxLikeHMM:
         return beta
 
 
-    def gamma_robust_alt(self, A, alpha, beta):
+    def gamma_robust(self, A, alpha, beta):
         num_states = A.shape[0]
         num_observed = self.observations.shape[0]
 
@@ -250,7 +250,7 @@ class MaxLikeHMM:
 
         return xi
 
-    def baum_welch_robust_alt(self, A, B, initial):
+    def baum_welch_robust(self, A, B, initial):
         num_states = np.shape(A)[0]
         T = len(self.observations)
         converge = False
@@ -262,7 +262,7 @@ class MaxLikeHMM:
             self.alpha = alpha
             self.beta = beta
 
-            gamma = self.gamma_robust_alt(A, self.alpha, self.beta)
+            gamma = self.gamma_robust(A, self.alpha, self.beta)
             xi  = self.xi_robust(A, B, self.alpha, self.beta)
 
             for i in range(num_states):
