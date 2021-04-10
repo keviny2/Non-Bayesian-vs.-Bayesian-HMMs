@@ -204,12 +204,12 @@ class MaxLikeHMM:
         beta = np.zeros((num_observed, num_states))
 
         for t in range(num_observed - 2, -1, -1):
-            for j in range(num_states):
+            for i in range(num_states):
                 logbeta = None
-                for i in range(num_states):
-                    logbeta = self.elnsum(logbeta, self.elnproduct(self.eln(A[j, i]),
+                for j in range(num_states):
+                    logbeta = self.elnsum(logbeta, self.elnproduct(self.eln(A[i, j]),
                                                                    self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])), beta[t+1, j])))
-                beta[t, j] = logbeta
+                beta[t, i] = logbeta
 
         return beta
 
@@ -235,19 +235,19 @@ class MaxLikeHMM:
         num_states = A.shape[0]
         num_observed = self.observations.shape[0]
 
-        xi = np.zeros((num_states, num_states, num_observed-1))
+        xi = np.zeros((num_observed-1, num_states, num_states))
+
         for t in range(num_observed-1):
             normalizer = None
             for i in range(num_states):
                 for j in range(num_states):
-                    xi[j, i, t] = self.elnproduct(alpha[t, i], self.elnproduct(self.eln(A[j, i]),
+                    xi[t, i, j] = self.elnproduct(alpha[t, i], self.elnproduct(self.eln(A[i, j]),
                                                                                     self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])),
                                                                                                     beta[t+1, j])))
-                    normalizer = self.elnsum(normalizer, xi[j, i, t])
+                    normalizer = self.elnsum(normalizer, xi[t, i, j])
             for i in range(num_states):
                 for j in range(num_states):
-                    xi[j, i, t] = self.elnproduct(xi[j, i, t], -normalizer)
-
+                    xi[t, i, j] = self.elnproduct(xi[t, i, j], -normalizer)
         return xi
 
     def baum_welch_robust(self, A, B, initial):
@@ -265,6 +265,7 @@ class MaxLikeHMM:
             gamma = self.gamma_robust(A, self.alpha, self.beta)
             xi  = self.xi_robust(A, B, self.alpha, self.beta)
 
+
             for i in range(num_states):
                 initial[i] = self.eexp(gamma[1, i])
 
@@ -273,40 +274,45 @@ class MaxLikeHMM:
                     numerator = None
                     denominator = None
                     for t in range(T-1):
-                        numerator = self.elnsum(numerator, xi[j, i, t])
+                        numerator = self.elnsum(numerator, xi[t, i, j])
                         denominator = self.elnsum(denominator, gamma[t, i])
-                    A[j, i] = self.eexp(self.elnproduct(numerator, -denominator))
+                    A[i, j] = self.eexp(self.elnproduct(numerator, -denominator))
 
             for i in range(num_states):
                 numerator = None
                 denominator = None
                 for t in range(T):
-                    numerator = self.elnsum(numerator, self.elnproduct(gamma[t, i], self.observations[t]))
+                    numerator = self.elnsum(numerator, self.elnproduct(gamma[t, i], self.eln(self.observations[t])))
                     denominator = self.elnsum(denominator, gamma[t, i])
                 B[i, 0] = self.eexp(self.elnproduct(numerator, -denominator))
 
+
                 numerator = None
                 for t in range(T):
-                    numerator = self.elnsum(numerator, self.elnproduct(gamma[t, i], (self.observations[t] - B[i, 0])**2))
-                B[i, 1] = self.eexp(self.elnproduct(numerator, -denominator))
+                    numerator = self.elnsum(numerator, self.elnproduct(gamma[t, i], self.eln((self.observations[t] - B[i, 0])**2)))
+                B[i, 1] = np.sqrt(self.eexp(self.elnproduct(numerator, -denominator)))
 
             loglik_new = initial @ np.log(initial)
 
             for i in range(T - 1):
                 for j in range(num_states):
                     for k in range(num_states):
-                        loglik_new += self.eexp(xi[j, k, i]) * np.log(A[j, k])
+                        loglik_new += self.eexp(xi[i, j, k]) * np.log(A[j, k])
 
             for i in range(len(self.observations)):
                 for j in range(num_states):
                     loglik_new += self.eexp(gamma[i, j]) * np.log(normal_pdf(self.observations[i], B[j, 0], B[j, 1]))
 
-            if (np.abs(loglik_new - loglik_prev) < 1e-6):
+            if (np.abs(loglik_new - loglik_prev) < 1e-4):
                 converge = True
             else:
                 loglik_prev = loglik_new
 
-        return A, B
+            print(loglik_new)
+            print(A)
+            print(B)
+            print(initial)
+        #return A, B
 
 
     def baum_welch_alternative(self, A, B, initial):
@@ -415,6 +421,13 @@ class MaxLikeHMM:
             path[i] = state[path[i+1], [i+1]]
 
         return path, prob, state
+
+    def viterbi_robust(self, initial, A, B):
+        num_states = np.shape(A)[0]
+        T = len(self.observations)
+
+        prob = self.forward_robust(A, B, initial)
+        
 
 if __name__ == '__main__':
 

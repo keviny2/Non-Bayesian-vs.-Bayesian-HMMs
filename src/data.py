@@ -62,8 +62,9 @@ for i in np.arange(1, 1000):
 # plt.plot(state)
 # plt.show()
 
-A = np.array([[0.6, 0.3, 0.1], [0.1,0.8,0.1],[0.1,0.3,0.6]])
-B = np.array([[-2, 1], [0, 1], [2, 1]])
-initial = init
+A = np.array([[0.5, 0.3, 0.2], [0.2,0.7,0.1],[0.1,0.5,0.4]])
+B = np.array([[-5, 10], [5, 10], [0, 10]])
+initial = np.array([0.1,0.3,0.6])
 model = MaxLikeHMM.MaxLikeHMM(obs)
-model.baum_welch_robust(A,B, initial)
+model.baum_welch_robust(A, B, initial)
+
