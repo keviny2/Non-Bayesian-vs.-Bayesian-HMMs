@@ -66,7 +66,4 @@ A = np.array([[0.6, 0.3, 0.1], [0.1,0.8,0.1],[0.1,0.3,0.6]])
 B = np.array([[-2, 1], [0, 1], [2, 1]])
 initial = init
 model = MaxLikeHMM.MaxLikeHMM(obs)
-np.set_printoptions(threshold=np.inf)
-
-obs_prime = np.argmax(model.forward_robust(A, B, initial), axis = 1)
-print(obs_prime == state)
+model.baum_welch_robust(A,B, initial)

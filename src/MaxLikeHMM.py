@@ -163,8 +163,8 @@ class MaxLikeHMM:
             raise ValueError
 
 
-    def elnsum(self, x, y):
-        if x== None or y == None:
+    def elnsum(self, x, y):  # ln(x+y)
+        if x == None or y == None:
             if x == None:
                 return y
             else:
@@ -176,7 +176,7 @@ class MaxLikeHMM:
             else:
                 return y + self.eln(1+np.exp(x - y))
 
-    def elnproduct(self, x, y):
+    def elnproduct(self, x, y):  # ln(x) + ln(y)
         if x == None or y == None:
             return None
         else:
@@ -196,7 +196,6 @@ class MaxLikeHMM:
                     logalpha = self.elnsum(logalpha, self.elnproduct(alpha[t-1, i], self.eln(A[i, j])))
                 alpha[t, j] = self.elnproduct(logalpha, self.eln(normal_pdf(self.observations[t], B[j, 0], B[j, 1])))
 
-        self.alpha = alpha
         return alpha
 
     def backward_robust(self, A, B):
@@ -204,21 +203,18 @@ class MaxLikeHMM:
         num_observed = self.observations.shape[0]
         beta = np.zeros((num_observed, num_states))
 
-        beta[self.observations.shape[0] - 1] = np.zeros(num_states)
         for t in range(num_observed - 2, -1, -1):
-            for i in range(num_states):
+            for j in range(num_states):
                 logbeta = None
-                for j in range(num_states):
+                for i in range(num_states):
                     logbeta = self.elnsum(logbeta, self.elnproduct(self.eln(A[j, i]),
                                                                    self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])), beta[t+1, j])))
-                beta[t, i] = logbeta
+                beta[t, j] = logbeta
 
-
-        self.beta = beta
         return beta
 
 
-    def gamma_robust(self, A):
+    def gamma_robust(self, A, alpha, beta):
         num_states = A.shape[0]
         num_observed = self.observations.shape[0]
 
@@ -226,16 +222,16 @@ class MaxLikeHMM:
         for t in range(num_observed):
             normalizer = None
             for i in range(num_states):
-                gamma[t, i] = self.elnproduct(self.alpha[t, i], self.beta[t, i])
+                gamma[t, i] = self.elnproduct(alpha[t, i],beta[t, i])
                 normalizer = self.elnsum(normalizer, gamma[t,i])
 
-            for i in range(num_observed):
+            for i in range(num_states):
                 gamma[t, i] = self.elnproduct(gamma[t, i], -normalizer)
 
         return gamma
 
 
-    def xi_robust(self, A, B, initial):
+    def xi_robust(self, A, B, alpha, beta):
         num_states = A.shape[0]
         num_observed = self.observations.shape[0]
 
@@ -244,15 +240,74 @@ class MaxLikeHMM:
             normalizer = None
             for i in range(num_states):
                 for j in range(num_states):
-                    xi[j, i, t] = self.elnproduct(self.alpha[t, i], self.elnproduct(self.eln(A[j, i]),
+                    xi[j, i, t] = self.elnproduct(alpha[t, i], self.elnproduct(self.eln(A[j, i]),
                                                                                     self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])),
-                                                                                                    self.beta[t+1, j])))
+                                                                                                    beta[t+1, j])))
                     normalizer = self.elnsum(normalizer, xi[j, i, t])
             for i in range(num_states):
                 for j in range(num_states):
                     xi[j, i, t] = self.elnproduct(xi[j, i, t], -normalizer)
 
         return xi
+
+    def baum_welch_robust(self, A, B, initial):
+        num_states = np.shape(A)[0]
+        T = len(self.observations)
+        converge = False
+        loglik_prev = - np.inf
+
+        while not converge:
+            alpha = self.forward_robust(A, B, initial)
+            beta = self.backward_robust(A, B)
+            self.alpha = alpha
+            self.beta = beta
+
+            gamma = self.gamma_robust(A, self.alpha, self.beta)
+            xi  = self.xi_robust(A, B, self.alpha, self.beta)
+
+            for i in range(num_states):
+                initial[i] = self.eexp(gamma[1, i])
+
+            for i in range(num_states):
+                for j in range(num_states):
+                    numerator = None
+                    denominator = None
+                    for t in range(T-1):
+                        numerator = self.elnsum(numerator, xi[j, i, t])
+                        denominator = self.elnsum(denominator, gamma[t, i])
+                    A[j, i] = self.eexp(self.elnproduct(numerator, -denominator))
+
+            for i in range(num_states):
+                numerator = None
+                denominator = None
+                for t in range(T):
+                    numerator = self.elnsum(numerator, self.elnproduct(gamma[t, i], self.observations[t]))
+                    denominator = self.elnsum(denominator, gamma[t, i])
+                B[i, 0] = self.eexp(self.elnproduct(numerator, -denominator))
+
+                numerator = None
+                for t in range(T):
+                    numerator = self.elnsum(numerator, self.elnproduct(gamma[t, i], (self.observations[t] - B[i, 0])**2))
+                B[i, 1] = self.eexp(self.elnproduct(numerator, -denominator))
+
+            loglik_new = initial @ np.log(initial)
+
+            for i in range(T - 1):
+                for j in range(num_states):
+                    for k in range(num_states):
+                        loglik_new += self.eexp(xi[j, k, i]) * np.log(A[j, k])
+
+            for i in range(len(self.observations)):
+                for j in range(num_states):
+                    loglik_new += self.eexp(gamma[i, j]) * np.log(normal_pdf(self.observations[i], B[j, 0], B[j, 1]))
+
+            if (np.abs(loglik_new - loglik_prev) < 1e-6):
+                converge = True
+            else:
+                loglik_prev = loglik_new
+
+        return A, B
+
 
     def baum_welch_alternative(self, A, B, initial):
 
