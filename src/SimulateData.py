@@ -32,6 +32,8 @@ class SimulateData:
         observations = np.zeros(num_obs)
         state_path = np.zeros(num_obs)
         curr_state = np.argmax(np.random.multinomial(1, initial_state, 1))
+
+        # should be fine, don't need to vectorize
         for i in range(num_obs):
             state_path[i] = curr_state
             observations[i] = np.random.normal(emission_prob[curr_state, 0], emission_prob[curr_state, 1])

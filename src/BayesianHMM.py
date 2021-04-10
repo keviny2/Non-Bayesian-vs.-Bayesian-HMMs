@@ -1,7 +1,9 @@
 import numpy as np
 from SimulateData import SimulateData
-from Distribution import normal_pdf
+from Distribution import normal_log_pdf
+from numba_functions import backward_robust, sample_states_numba
 from MaxLikeHMM import MaxLikeHMM
+
 
 class BayesianHMM(MaxLikeHMM):
 
@@ -79,13 +81,12 @@ class BayesianHMM(MaxLikeHMM):
         inference step
         :return:
         """
-        # TODO: vectorize code (very slow right now)
 
         # burnin period
         for i in range(num_burnin):
 
             print("=" * 20, 'Performing Burn-in', '=' * 20)
-            print('Iteration:', i)
+            print('Iteration:', i+1)
 
             self.sample_mu()
             self.sample_sigma_invsq()
@@ -105,7 +106,9 @@ class BayesianHMM(MaxLikeHMM):
         for i in range(num_iter):
 
             print("=" * 20, 'Performing Inference', '=' * 20)
-            print('Iteration:', i)
+            print('Iteration:', i+1)
+
+            # BUG: seems like the last state eats up all the probability
 
             self.sample_mu()
             self.sample_sigma_invsq()
@@ -161,37 +164,33 @@ class BayesianHMM(MaxLikeHMM):
         alpha = np.zeros(self.num_states)
         for i in range(self.num_states):
             alpha[i] = np.count_nonzero(self.state_path == i)
-        self.initial_dist = np.random.dirichlet(alpha)
+        self.initial_dist = np.random.dirichlet(alpha + 1)
 
 
     def sample_states(self):
-        # sample X1
-        B = [[self.mu[i], np.sqrt(1 / self.sigma_invsq)] for i in range(self.num_states)]  # create list compatible with backward_robust
+        B = [[self.mu[i], np.sqrt(1 / self.sigma_invsq)] for i in range(self.num_states)]
 
         # beta[i, j] = p(x_{i+1,...,n} | z_i = j)
         # beta[i, j] represents the probability that at time i,
         # you observe everything after (x_{i+1},...,x_n) and given that you are at state j (z_i = j)
-        beta = self.backward_robust(self.A, np.asmatrix(B))
+        beta = backward_robust(self.A, np.asmatrix(B), self.observations)
 
-        probabilities = np.log(self.initial_dist) + \
-                        np.log(normal_pdf(self.observations[0], self.mu, np.sqrt(1/self.sigma_invsq))) + \
-                        beta[0]
-        probabilities = probabilities / np.sum(probabilities)  # make probs add up to 1
+        new_state_path = sample_states_numba(beta,
+                                             self.initial_dist,
+                                             self.observations,
+                                             self.mu,
+                                             self.sigma_invsq,
+                                             self.A,
+                                             self.num_obs)
 
-        self.state_path[0] = np.argmax(np.random.multinomial(1, probabilities))  # sample new state
+        self.state_path = new_state_path
 
-        for i in range(1, self.num_obs):
-            probabilities = np.log(self.A[self.state_path[i-1], :]) + \
-                            np.log(normal_pdf(self.observations[i], self.mu, np.sqrt(1/self.sigma_invsq))) + \
-                            beta[i]
-            probabilities = probabilities / np.sum(probabilities)  # make probs add up to 1
-
-            self.state_path[i] = np.argmax(np.random.multinomial(1, probabilities))  # sample new state
 
 
 if __name__ == '__main__':
+    np.random.seed(123)
     simulate = SimulateData()
-    observations, state_path, A, B, initial = simulate.simulate_data(num_obs=int(1e4), continuous=True)
+    observations, state_path, A, B, initial = simulate.simulate_data(num_obs=int(1e3), continuous=True)
 
     HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=A.shape[0])
     HMM.generate_priors()

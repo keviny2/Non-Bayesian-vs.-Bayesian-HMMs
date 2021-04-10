@@ -1,5 +1,5 @@
 import numpy as np
-from Distribution import normal_pdf
+from Distribution import normal_pdf, normal_log_pdf
 from SimulateData import SimulateData
 
 class MaxLikeHMM:
@@ -146,12 +146,23 @@ class MaxLikeHMM:
     #     return {"a": A, "b": B}
 
     def eexp(self, x):
+        """
+
+        :param x: x
+        :return: exp(x)
+        """
         if x == None:
             return 0
         else:
             return np.exp(x)
 
-    def eln(self,x):
+
+    def eln(self, x):
+        """
+
+        :param x: x
+        :return: ln(x)
+        """
         try:
             if x == 0:
                 return None
@@ -163,7 +174,13 @@ class MaxLikeHMM:
 
 
     def elnsum(self, x, y):
-        if x== None or y == None:
+        """
+
+        :param x: eln(x)
+        :param y: eln(y)
+        :return: ln(x + y)
+        """
+        if x == None or y == None:
             if x == None:
                 return y
             else:
@@ -171,11 +188,18 @@ class MaxLikeHMM:
 
         else:
             if x > y:
-                return x + self.eln(1+np.exp(y - x))
+                return x + self.eln(1 + np.exp(y - x))
             else:
-                return y + self.eln(1+np.exp(x - y))
+                return y + self.eln(1 + np.exp(x - y))
+
 
     def elnproduct(self, x, y):
+        """
+
+        :param x: eln(x)
+        :param y: eln(y)
+        :return: ln(x) + ln(y)
+        """
         if x == None or y == None:
             return None
         else:
@@ -198,6 +222,7 @@ class MaxLikeHMM:
         self.alpha = alpha
         return alpha
 
+
     def backward_robust(self, A, B):
         num_states = A.shape[0]
         num_observed = self.observations.shape[0]
@@ -209,7 +234,7 @@ class MaxLikeHMM:
                 logbeta = None
                 for j in range(num_states):
                     logbeta = self.elnsum(logbeta, self.elnproduct(self.eln(A[j, i]),
-                                                                   self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])),
+                                                                   self.elnproduct(normal_log_pdf(self.observations[t+1], B[j, 0], B[j, 1]),
                                                                                    beta[t+1, j])))
                 beta[t, i] = logbeta
 
