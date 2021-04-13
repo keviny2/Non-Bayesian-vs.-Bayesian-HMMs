@@ -10,8 +10,6 @@ from Distribution import normal_pdf
 
 
 A = np.array([[0.6, 0.3, 0.1], [0.1,0.8,0.1],[0.1,0.3,0.6]])
-
-
 mu = np.array([-2, 0, 2])
 
 
