@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import random
@@ -46,7 +47,6 @@ while not converge:
         converge = True
 init = np.array([0.2,0.6,0.2])
 
-random.seed(1)
 state = np.zeros(1000)
 obs = np.zeros(1000)
 state[0] = generate_state(init, generate_num())
@@ -57,16 +57,33 @@ for i in np.arange(1, 1000):
     state[i] = generate_state(tran, generate_num())
     obs[i] = generate_obs(state[i])
 
+# plt.figure()
 # plt.plot(obs)
-# plt.show()
+# fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "original")
+# plt.savefig(fname)
+# print("\nFigure saved as '%s'" % fname)
 # plt.plot(state)
 # plt.show()
 
-A = np.array([[0.6, 0.3, 0.1], [0.1,0.8,0.1],[0.1,0.3,0.6]])
-B = np.array([[-2, 1], [0, 1], [2, 1]])
-initial = init
 model = MaxLikeHMM.MaxLikeHMM(obs)
-np.set_printoptions(threshold=np.inf)
+A = np.array([[0.6, 0.2,0.2], [0.2,0.6,0.2], [0.2,0.2,0.6]])
+B = np.array([[-2, 3], [0, 3], [2,3]])
+init = np.array([0.3, 0.4,0.3])
+sim_A, sim_B, sim_init = model.baum_welch_robust(A, B, init)
 
-obs_prime = np.argmax(model.forward_robust(A, B, initial), axis = 1)
-print(obs_prime == state)
+path, _, _ = model.viterbi_robust(sim_init, sim_A, sim_B)
+print(path)
+print(sum(path == state))
+
+sim_obs = np.zeros(1000)
+obs[0] = np.random.normal(0, 1)
+for i in np.arange(1, 1000):
+    tran = sim_A[int(state[i-1])]
+    state[i] = generate_state(tran, generate_num())
+    sim_obs[i] = np.random.normal(0, 1)
+
+plt.figure()
+plt.plot(sim_obs)
+fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "simulate")
+plt.savefig(fname)
+print("\nFigure saved as '%s'" % fname)

@@ -110,7 +110,8 @@ def sample_states_numba(beta: np.ndarray, initial_dist: np.ndarray, observations
 
     # construct new np.array to hold the sampled state path
     new_state_path = np.empty(num_obs)
-    new_state_path[0] = np.argmax(np.random.multinomial(1, probabilities))  # sample new state
+
+    new_state_path[0] = np.argmax(np.random.multinomial(1, np.maximum(np.minimum(probabilities / np.sum(probabilities), 1), 0)))  # sample new state
 
     for i in range(1, num_obs):
         # equation (6) in /literature/Bayesian\ Model.pdf
@@ -120,7 +121,7 @@ def sample_states_numba(beta: np.ndarray, initial_dist: np.ndarray, observations
 
         probabilities = compute_probabilities(log_probabilities)
 
-        new_state_path[i] = np.argmax(np.random.multinomial(1, probabilities))  # sample new state
+        new_state_path[i] = np.argmax(np.random.multinomial(1, np.maximum(np.minimum(probabilities / np.sum(probabilities), 1), 0)))  # sample new state
 
     return new_state_path
 
@@ -150,3 +151,19 @@ def compute_probabilities(log_probabilities):
                 valid_probabilities = np.append(valid_probabilities, 0)
 
         return valid_probabilities / np.sum(valid_probabilities)
+
+
+@jit(nopython=True)
+def simulate_observations(num_obs, initial_state, emission_prob, state_transition):
+
+    observations = np.zeros(num_obs)
+    state_path = np.zeros(num_obs)
+
+    curr_state = np.argmax(np.random.multinomial(1, initial_state, 1))
+
+    for i in range(num_obs):
+        state_path[i] = curr_state
+        observations[i] = np.random.normal(emission_prob[curr_state, 0], emission_prob[curr_state, 1])
+        curr_state = np.argmax(np.random.multinomial(1, state_transition[curr_state, :]))
+
+    return observations

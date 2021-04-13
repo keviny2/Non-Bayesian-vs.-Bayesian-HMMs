@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from numba_functions import simulate_observations
 
 class SimulateData:
 
@@ -29,15 +30,16 @@ class SimulateData:
         if initial_state is None:
             initial_state = np.array([1/3, 1/3, 1/3])
 
-        observations = np.zeros(num_obs)
-        state_path = np.zeros(num_obs)
-        curr_state = np.argmax(np.random.multinomial(1, initial_state, 1))
+        observations = simulate_observations(num_obs, initial_state, emission_prob, state_transition)
 
-        # should be fine, don't need to vectorize
-        for i in range(num_obs):
-            state_path[i] = curr_state
-            observations[i] = np.random.normal(emission_prob[curr_state, 0], emission_prob[curr_state, 1])
-            curr_state = np.argmax(np.random.multinomial(1, state_transition[curr_state, :]))
+        # observations = np.zeros(num_obs)
+        # state_path = np.zeros(num_obs)
+        # curr_state = np.argmax(np.random.multinomial(1, initial_state, 1))
+        #
+        # for i in range(num_obs):
+        #     state_path[i] = curr_state
+        #     observations[i] = np.random.normal(emission_prob[curr_state, 0], emission_prob[curr_state, 1])
+        #     curr_state = np.argmax(np.random.multinomial(1, state_transition[curr_state, :]))
 
         # generate random initialization
         A = self.generate_random_state_transition_matrix(state_transition.shape[0], state_transition.shape[1])

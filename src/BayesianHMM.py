@@ -1,11 +1,10 @@
 import numpy as np
 from SimulateData import SimulateData
-from Distribution import normal_log_pdf
 from numba_functions import backward_robust, sample_states_numba
 from MaxLikeHMM import MaxLikeHMM
 
 
-class BayesianHMM(MaxLikeHMM):
+class BayesianHMM():
 
     def __init__(self, observations=None, state_path=None, num_states=6):
         """
@@ -108,7 +107,7 @@ class BayesianHMM(MaxLikeHMM):
             print("=" * 20, 'Performing Inference', '=' * 20)
             print('Iteration:', i+1)
 
-            # BUG: seems like the last state eats up all the probability
+            # BUG: seems like one state eats up all the probability (probably something wrong with state path sampler)
 
             self.sample_mu()
             self.sample_sigma_invsq()
@@ -190,7 +189,32 @@ class BayesianHMM(MaxLikeHMM):
 if __name__ == '__main__':
     np.random.seed(123)
     simulate = SimulateData()
-    observations, state_path, A, B, initial = simulate.simulate_data(num_obs=int(1e3), continuous=True)
+
+    state_transition = np.array([[0.8, 0.04, 0.05, 0.04, 0.03, 0.04],
+                                 [0.03, 0.85, 0.03, 0.04, 0.02, 0.03],
+                                 [0.02, 0.02, 0.9, 0.02, 0.02, 0.02],
+                                 [0.04, 0.03, 0.09, 0.75, 0.04, 0.05],
+                                 [0.02, 0.04, 0.03, 0.02, 0.87, 0.02],
+                                 [0.01, 0.01, 0.01, 0.01, 0.01, 0.95]])
+
+    emission_prob = np.array([[0, 0.5],
+                              [1, 0.5],
+                              [2, 0.5],
+                              [3, 0.5],
+                              [4, 0.5],
+                              [5, 0.5]])
+
+    initial_state = np.ones(state_transition.shape[0]) / state_transition.shape[0]
+
+    # observations, state_path, A, B, initial = simulate.simulate_data(num_obs=int(1e5), continuous=True)
+    # observations, state_path, A, B, initial = simulate.simulate_data(state_transition=state_transition,
+    #                                                                  emission_prob=emission_prob,
+    #                                                                  initial_state=initial_state,
+    #                                                                  num_obs=int(1e3),
+    #                                                                  continuous=True)
+
+    observations, state_path, A, B, initial = simulate.simulate_data(num_obs=int(1e3),
+                                                                     continuous=True)
 
     HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=A.shape[0])
     HMM.generate_priors()
