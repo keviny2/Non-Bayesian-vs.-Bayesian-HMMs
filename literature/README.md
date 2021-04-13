@@ -59,6 +59,9 @@ https://www.inf.ed.ac.uk/teaching/courses/asr/2016-17/asr03-hmmgmm-handout.pdf
 #### KDE and HMM
 - https://arxiv.org/pdf/1807.11320.pdf
 
+#### Numerically Stable HMM Implementation
+- http://bozeman.genome.washington.edu/compbio/mbt599_2006/hmm_scaling_revised.pdf
+
 
 ### Imputation methods
 ______________________________________

@@ -9,7 +9,141 @@ class MaxLikeHMM:
 
         :param observations: vector of observations
         """
+
+        # TODO: clean up this file?
         self.observations = observations
+
+    def forward(self, A, B, initial):
+        num_states = A.shape[0]
+        num_observed = self.observations.shape[0]
+        alpha = np.zeros((num_observed, num_states)) # store values for previous alphas
+        alpha[0, :] = initial * B[:, self.observations[0] - 1]
+
+        for t in range(1, num_observed):
+            for j in range(num_states):
+                alpha[t, j] = alpha[t - 1].dot(A[:, j]) * B[j, self.observations[t] - 1]
+
+        return alpha
+
+
+    def forward_continuous(self, A, B, initial):
+        num_states = A.shape[0]
+        num_observed = self.observations.shape[0]
+        alpha = np.zeros((num_observed, num_states)) # store values for previous alphas
+        alpha[0, :] = initial * normal_pdf(self.observations[0], B[:, 0], B[:, 1])
+
+        for t in range(1, num_observed):
+            for j in range(num_states):
+                alpha[t, j] = alpha[t - 1].dot(A[:, j]) * normal_pdf(self.observations[t], B[j, 0], B[j, 1])
+
+        return alpha
+
+
+    def backward(self, A, B):
+        num_states = A.shape[0]
+        num_observed = self.observations.shape[0]
+        beta = np.zeros((num_observed, num_states))
+
+        # setting beta(T) = 1
+        beta[self.observations.shape[0] - 1] = np.ones((num_states))
+
+        # Loop in backward way from T-1 to
+        # Due to python indexing the actual loop will be T-2 to 0
+        for t in range(num_observed - 2, -1, -1):
+            for j in range(num_states):
+                beta[t, j] = (beta[t + 1] * B[:, self.observations[t + 1] - 1]).dot(A[j, :])
+
+        return beta
+
+
+    def backward_continuous(self, A, B):
+        num_states = A.shape[0]
+        num_observed = self.observations.shape[0]
+        beta = np.zeros((num_observed, num_states))
+
+        # setting beta(T) = 1
+        beta[self.observations.shape[0] - 1] = np.ones((num_states))
+
+        # Loop in backward way from T-1 to
+        # Due to python indexing the actual loop will be T-2 to 0
+        for t in range(num_observed - 2, -1, -1):
+            for j in range(num_states):
+                beta[t, j] = (beta[t + 1] * normal_pdf(self.observations[t + 1], B[j, 0], B[j, 1])).dot(A[j, :])
+        return beta
+
+    def baum_welch(self, A, B, initial, n_iter=100):
+        num_states = A.shape[0]
+        T = len(self.observations)
+
+        for n in range(n_iter):
+            alpha = self.forward(A, B, initial)
+            beta = self.backward(A, B)
+
+            xi = np.zeros((num_states, num_states, T - 1))
+            for t in range(T - 1):
+                denominator = np.dot(np.dot(alpha[t, :].T, A) * B[:, self.observations[t + 1] - 1].T, beta[t + 1, :])
+                for i in range(num_states):
+                    numerator = alpha[t, i] * A[i, :] * B[:, self.observations[t + 1] - 1].T * beta[t + 1, :].T
+                    xi[i, :, t] = numerator / denominator
+
+            gamma = np.sum(xi, axis=1)
+            A = np.sum(xi, 2) / np.sum(gamma, axis=1).reshape((-1, 1))
+
+            # Add additional T'th element in gamma
+            gamma = np.hstack((gamma, np.sum(xi[:, :, T - 2], axis=0).reshape((-1, 1))))
+
+            K = B.shape[1]
+            denominator = np.sum(gamma, axis=1)
+            for l in range(K):
+                B[:, l] = np.sum(gamma[:, self.observations == l + 1], axis=1)
+
+            B = np.divide(B, denominator.reshape((-1, 1)))
+
+        return {"a": A, "b": B}
+
+    # TODO: implement Baum Welch with robust forward backward implementations?
+    # def baum_welch_continuous(self, A, B, initial, n_iter=100):
+    #     """
+    #
+    #     :param A: state transition matrix
+    #     :param B: [[mu1,sigma1],
+    #                [mu2,sigma2],
+    #                 ....]
+    #     :param initial: initial probabilities
+    #     :param n_iter: number of iterations
+    #     :return: updated state transition and emission matrices
+    #     """
+    #     num_states = A.shape[0]
+    #     T = len(self.observations)
+    #
+    #     for n in range(n_iter):
+    #         alpha = self.forward_continuous(A, B, initial)
+    #         beta = self.backward_continuous(A, B)
+    #
+    #         xi = np.zeros((num_states, num_states, T - 1))
+    #         for t in range(T - 1):
+    #             denominator = np.dot(np.dot(alpha[t, :].T, A) * np.array([normal_pdf(self.observations[t + 1], B[state, 0], B[state, 1]) for state in range(num_states)]).T, beta[t + 1, :])
+    #             for i in range(num_states):
+    #                 numerator = alpha[t, i] * A[i, :] * np.array([normal_pdf(self.observations[t + 1], B[state, 0], B[state, 1]) for state in range(num_states)]).T * beta[t + 1, :].T
+    #                 xi[i, :, t] = numerator / denominator
+    #
+    #         gamma = np.sum(xi, axis=1)
+    #         A = np.sum(xi, 2) / np.sum(gamma, axis=1).reshape((-1, 1))
+    #
+    #         # Add additional T'th element in gamma
+    #         gamma = np.hstack((gamma, np.sum(xi[:, :, T - 2], axis=0).reshape((-1, 1))))
+    #
+    #         # formulas from U of T lecture slides:
+    #         # http://www.utstat.toronto.edu/~rsalakhu/sta4273/notes/Lecture11.pdf
+    #         K = B.shape[0]
+    #         for l in range(K):
+    #             denominator = np.sum(gamma[l, :])
+    #             new_mu = np.dot(gamma[l, :], self.observations)
+    #             new_sigma = np.dot(gamma[l, :], np.square(self.observations - B[l][1]))
+    #             B[l, :] = [new_mu, new_sigma] / denominator
+    #
+    #
+    #     return {"a": A, "b": B}
 
     def eexp(self, x):
         if x == None:
@@ -72,9 +206,11 @@ class MaxLikeHMM:
             for i in range(num_states):
                 logbeta = None
                 for j in range(num_states):
+
                     logbeta = self.elnsum(logbeta, self.elnproduct(self.eln(A[i, j]),
                                                                    self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])), beta[t+1, j])))
                 beta[t, i] = logbeta
+    
         return beta
 
 
@@ -86,7 +222,9 @@ class MaxLikeHMM:
         for t in range(num_observed):
             normalizer = None
             for i in range(num_states):
+
                 gamma[t, i] = self.elnproduct(alpha[t, i],beta[t, i])
+
                 normalizer = self.elnsum(normalizer, gamma[t,i])
 
             for i in range(num_states):
@@ -111,6 +249,7 @@ class MaxLikeHMM:
                                                                                     self.elnproduct(self.eln(normal_pdf(self.observations[t+1], B[j, 0], B[j, 1])),
                                                                                                     beta[t+1, j])))
                     normalizer = self.elnsum(normalizer, xi[t, i, j])
+
             for i in range(num_states):
                 for j in range(num_states):
                     xi[t, i, j] = self.elnproduct(xi[t, i, j], -normalizer)
