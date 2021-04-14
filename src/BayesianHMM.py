@@ -1,7 +1,7 @@
 import numpy as np
 from SimulateData import SimulateData
 from numba_functions import backward_robust, sample_states_numba
-from MaxLikeHMM import MaxLikeHMM
+import matplotlib.pyplot as plt
 
 
 class BayesianHMM():
@@ -95,19 +95,10 @@ class BayesianHMM():
             self.sample_states()
 
         # inference
-        self.chain.append({'mu': self.mu,
-                           'sigma_invsq': self.sigma_invsq,
-                           'beta': self.beta,
-                           'A': self.A,
-                           'initial_dist': self.initial_dist,
-                           'sample_states': self.state_path})
-
         for i in range(num_iter):
 
             print("=" * 20, 'Performing Inference', '=' * 20)
             print('Iteration:', i+1)
-
-            # BUG: seems like one state eats up all the probability (probably something wrong with state path sampler)
 
             self.sample_mu()
             self.sample_sigma_invsq()
@@ -185,10 +176,32 @@ class BayesianHMM():
         self.state_path = new_state_path
 
 
+    def plot_results(self, num_iter, max=None):
+
+        if max is None:
+            max = num_iter
+
+        mus = [entry['mu'] for entry in self.chain]
+        mus = mus[-max:]
+        mus = np.asmatrix(mus)  # row i corresponds to the mus in the chain at iteration i
+
+        x = np.linspace(1, num_iter, num=num_iter)
+
+        for i in range(self.num_states):
+            plt.plot(x, mus[:, i])
+
+        plt.show()
+
+        # BUG:
+        #  1) The plots are uniform and do not exhibit much variability
+        #  2) Sometimes some mus will have a huge absolute value which is odd
+
+
+
+
 
 if __name__ == '__main__':
     np.random.seed(123)
-    simulate = SimulateData()
 
     state_transition = np.array([[0.8, 0.04, 0.05, 0.04, 0.03, 0.04],
                                  [0.03, 0.85, 0.03, 0.04, 0.02, 0.03],
@@ -197,25 +210,28 @@ if __name__ == '__main__':
                                  [0.02, 0.04, 0.03, 0.02, 0.87, 0.02],
                                  [0.01, 0.01, 0.01, 0.01, 0.01, 0.95]])
 
-    emission_prob = np.array([[0, 0.5],
-                              [1, 0.5],
-                              [2, 0.5],
-                              [3, 0.5],
-                              [4, 0.5],
-                              [5, 0.5]])
+    # variances need to be the same
+    emission_prob = np.array([[0, 2],
+                              [2, 2],
+                              [6, 2],
+                              [8, 2],
+                              [12, 2],
+                              [15, 2]])
 
     initial_state = np.ones(state_transition.shape[0]) / state_transition.shape[0]
 
-    # observations, state_path, A, B, initial = simulate.simulate_data(num_obs=int(1e5), continuous=True)
-    # observations, state_path, A, B, initial = simulate.simulate_data(state_transition=state_transition,
-    #                                                                  emission_prob=emission_prob,
-    #                                                                  initial_state=initial_state,
-    #                                                                  num_obs=int(1e3),
-    #                                                                  continuous=True)
-
-    observations, state_path, A, B, initial = simulate.simulate_data(num_obs=int(1e3),
+    simulate = SimulateData()
+    observations, state_path, A, B, initial = simulate.simulate_data(state_transition=state_transition,
+                                                                     emission_prob=emission_prob,
+                                                                     initial_state=initial_state,
+                                                                     num_obs=int(1e4),
                                                                      continuous=True)
 
     HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=A.shape[0])
     HMM.generate_priors()
-    HMM.sample_parameters()
+
+    num_iter = int(1e4)
+    HMM.sample_parameters(num_iter=num_iter, num_burnin=int(1e3))
+
+    # max = 500
+    HMM.plot_results(num_iter=num_iter)

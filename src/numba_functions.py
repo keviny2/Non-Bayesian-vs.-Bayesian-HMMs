@@ -86,7 +86,7 @@ def elnproduct(x, y):
         return x + y
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def sample_states_numba(beta: np.ndarray, initial_dist: np.ndarray, observations: np.ndarray,
                         mu: np.ndarray, sigma_invsq: float, A: np.ndarray, num_obs: int) -> np.ndarray:
     """
@@ -114,7 +114,7 @@ def sample_states_numba(beta: np.ndarray, initial_dist: np.ndarray, observations
     new_state_path[0] = np.argmax(np.random.multinomial(1, np.maximum(np.minimum(probabilities / np.sum(probabilities), 1), 0)))  # sample new state
 
     for i in range(1, num_obs):
-        # equation (6) in /literature/Bayesian\ Model.pdf
+        # equation (7) in /literature/Bayesian\ Model.pdf
         log_probabilities = np.log(A[int(new_state_path[i-1]), :]) + \
                                    normal_log_pdf(observations[i], mu, np.sqrt(1/sigma_invsq)) + \
                                    beta[i]
