@@ -82,10 +82,9 @@ class BayesianHMM():
         """
 
         # burnin period
+        print("=" * 20, 'Performing Burn-in', '=' * 20)
         for i in range(num_burnin):
-
-            print("=" * 20, 'Performing Burn-in', '=' * 20)
-            print('Iteration:', i+1)
+            print('(B) Iteration:', i+1)
 
             self.sample_mu()
             self.sample_sigma_invsq()
@@ -95,10 +94,9 @@ class BayesianHMM():
             self.sample_states()
 
         # inference
+        print("=" * 20, 'Performing Inference', '=' * 20)
         for i in range(num_iter):
-
-            print("=" * 20, 'Performing Inference', '=' * 20)
-            print('Iteration:', i+1)
+            print('(I) Iteration:', i+1)
 
             self.sample_mu()
             self.sample_sigma_invsq()
@@ -225,7 +223,7 @@ if __name__ == '__main__':
                                                                      emission_prob=emission_prob,
                                                                      initial_state=initial_state,
                                                                      num_obs=int(1e4),
-                                                                     continuous=True)
+                                                                     sherry=True)
 
     HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=A.shape[0])
     HMM.generate_priors()
