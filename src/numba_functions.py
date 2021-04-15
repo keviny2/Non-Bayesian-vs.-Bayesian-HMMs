@@ -86,19 +86,20 @@ def elnproduct(x, y):
         return x + y
 
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def sample_states_numba(beta: np.ndarray, initial_dist: np.ndarray, observations: np.ndarray,
                         mu: np.ndarray, sigma_invsq: float, A: np.ndarray, num_obs: int) -> np.ndarray:
     """
     numba version of function to sample from state distribution
+
     :param beta: backward algorithm probability ndarray
-    :param initial_dist:
+    :param initial_dist: np array of initial state probabilities
     :param observations:
-    :param mu:
-    :param sigma_invsq:
-    :param A:
-    :param num_obs:
-    :return:
+    :param mu: np array holding mus corresponding to each state
+    :param sigma_invsq: inverse of variance
+    :param A: stochastic matrix of transition probabilities
+    :param num_obs: integer number representing number of observations
+    :return: updated state path
     """
 
     # equation (6) in /literature/Bayesian\ Model.pdf
@@ -111,7 +112,7 @@ def sample_states_numba(beta: np.ndarray, initial_dist: np.ndarray, observations
     # construct new np.array to hold the sampled state path
     new_state_path = np.empty(num_obs)
 
-    new_state_path[0] = np.argmax(np.random.multinomial(1, np.maximum(np.minimum(probabilities / np.sum(probabilities), 1), 0)))  # sample new state
+    new_state_path[0] = multinomial(probabilities)
 
     for i in range(1, num_obs):
         # equation (7) in /literature/Bayesian\ Model.pdf
@@ -121,7 +122,7 @@ def sample_states_numba(beta: np.ndarray, initial_dist: np.ndarray, observations
 
         probabilities = compute_probabilities(log_probabilities)
 
-        new_state_path[i] = np.argmax(np.random.multinomial(1, np.maximum(np.minimum(probabilities / np.sum(probabilities), 1), 0)))  # sample new state
+        new_state_path[i] = multinomial(probabilities)
 
     return new_state_path
 
@@ -129,6 +130,7 @@ def sample_states_numba(beta: np.ndarray, initial_dist: np.ndarray, observations
 @jit(nopython=True)
 def compute_probabilities(log_probabilities):
     """
+    Stable way of computing probabilities from log probabilities
     Given a log-likelihood vector, convert to probability vector using method found in:
     https://stats.stackexchange.com/questions/66616/converting-normalizing-very-small-likelihood-values-to-probability
 
@@ -155,6 +157,15 @@ def compute_probabilities(log_probabilities):
 
 @jit(nopython=True)
 def simulate_observations(num_obs, initial_state, emission_prob, state_transition):
+    """
+    simulate observations for inference
+
+    :param num_obs: integer number representing number of observations
+    :param initial_state: np array of initial state probabilities
+    :param emission_prob: matrix holding parameters of normal distribution corresponding to each state
+    :param state_transition: stochastic matrix of transition probabilities
+    :return: simulated observations
+    """
 
     observations = np.zeros(num_obs)
     state_path = np.zeros(num_obs)
@@ -167,3 +178,19 @@ def simulate_observations(num_obs, initial_state, emission_prob, state_transitio
         curr_state = np.argmax(np.random.multinomial(1, state_transition[curr_state, :]))
 
     return observations
+
+
+@jit(nopython=True)
+def multinomial(probabilities):
+    """
+    wrote my own multinomial function because numba had trouble handling underflow/overflow variability
+    more on the issue can be found here: https://github.com/numba/numba/issues/3426
+
+    :param probabilities: probability numpy array
+    :return:
+    """
+    select = np.random.uniform(0, 1)
+
+    for i in range(0, len(probabilities)):
+        if select <= np.sum(probabilities[:i+1]):
+            return i

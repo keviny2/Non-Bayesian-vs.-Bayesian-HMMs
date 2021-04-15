@@ -119,7 +119,7 @@ class BayesianHMM():
             n_i = len(index)
             sigma_sq = 1 / self.sigma_invsq
             self.mu[i] = np.random.normal((S_i + self.kappa*self.xi*sigma_sq) / (n_i + self.kappa*sigma_sq),
-                                     sigma_sq / (n_i + self.kappa*sigma_sq))
+                                           sigma_sq / (n_i + self.kappa*sigma_sq))
 
 
     def sample_sigma_invsq(self):
@@ -135,7 +135,7 @@ class BayesianHMM():
     def sample_A(self):
         for i in range(self.num_states):
             # find indices of states that come right after state i
-            indices = np.where(self.state_path == i)[0] + 1 # indices of X_k
+            indices = np.where(self.state_path == i)[0] + 1  # indices of X_k
 
             # need to address the case for the last state in the sequence
             if self.num_obs in indices:
@@ -175,6 +175,12 @@ class BayesianHMM():
 
 
     def plot_results(self, num_iter, max=None):
+        """
+        plot the path of mus in MCMC chain
+        :param num_iter:
+        :param max:
+        :return:
+        """
 
         if max is None:
             max = num_iter
@@ -189,11 +195,6 @@ class BayesianHMM():
             plt.plot(x, mus[:, i])
 
         plt.show()
-
-        # BUG:
-        #  1) The plots are uniform and do not exhibit much variability
-        #  2) Sometimes some mus will have a huge absolute value which is odd
-
 
 
 
@@ -210,11 +211,11 @@ if __name__ == '__main__':
 
     # variances need to be the same
     emission_prob = np.array([[0, 2],
-                              [2, 2],
-                              [6, 2],
-                              [8, 2],
-                              [12, 2],
-                              [15, 2]])
+                              [5, 2],
+                              [10, 2],
+                              [15, 2],
+                              [20, 2],
+                              [25, 2]])
 
     initial_state = np.ones(state_transition.shape[0]) / state_transition.shape[0]
 
@@ -223,7 +224,7 @@ if __name__ == '__main__':
                                                                      emission_prob=emission_prob,
                                                                      initial_state=initial_state,
                                                                      num_obs=int(1e4),
-                                                                     sherry=True)
+                                                                     sherry=False)
 
     HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=A.shape[0])
     HMM.generate_priors()

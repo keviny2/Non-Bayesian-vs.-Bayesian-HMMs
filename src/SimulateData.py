@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from numba_functions import simulate_observations
 
 class SimulateData:
@@ -8,7 +7,18 @@ class SimulateData:
         pass
 
     def simulate_data(self, state_transition=None, emission_prob=None, initial_state=None, num_obs=100, sherry=False):
+        """
+        simulate data for inference
 
+        :param state_transition: stochastic matrix of transition probabilities
+        :param emission_prob: matrix holding parameters of normal distribution corresponding to each state
+        :param initial_state: np array of initial state probabilities
+        :param num_obs: integer number representing number of observations
+        :param sherry: boolean indicating which simulation procedure to perform
+        (sherry==TRUE corresponds to Sherry's procedure from CS540)
+
+        :return: simulated observations, state path, state transition matrix, emission parameters, initial distribution
+        """
         if sherry:
             return self.simulate_continuous_sherry(num_obs)
         else:
@@ -16,6 +26,15 @@ class SimulateData:
 
 
     def simulate_continuous(self, state_transition, emission_prob, initial_state, num_obs):
+        """
+        simulate data for HMM with discrete hidden space and continuous observation space
+
+        :param state_transition: stochastic matrix of transition probabilities
+        :param emission_prob: matrix holding parameters of normal distribution corresponding to each state
+        :param initial_state: np array of initial state probabilities
+        :param num_obs: integer number representing number of observations
+        :return:
+        """
         if state_transition is None:
             state_transition = np.array([[0.8, 0.1, 0.1],
                                          [0.05, 0.85, 0.1],
@@ -43,6 +62,12 @@ class SimulateData:
         return observations, state_path_sim, A, B, initial
 
     def generate_random_state_transition_matrix(self, nrow, ncol):
+        """
+        simulate random transition matrix
+        :param nrow:
+        :param ncol:
+        :return:
+        """
         x = np.random.random((nrow, ncol))
 
         rsum = None
@@ -57,6 +82,12 @@ class SimulateData:
         return x
 
     def generate_random_emission_matrix(self, nrow, ncol):
+        """
+        simulate random emission parameter matrix
+        :param nrow:
+        :param ncol:
+        :return:
+        """
         initial = np.random.normal(1, 0.5)
         emission_matrix = np.zeros((nrow, ncol))
         for row in range(nrow):
@@ -66,10 +97,21 @@ class SimulateData:
 
 
     def generate_random_state_path(self, num_states, num_obs):
+        """
+        simulate random state path
+        :param num_states:
+        :param num_obs:
+        :return:
+        """
         return np.random.choice(np.arange(num_states), num_obs)
 
 
     def simulate_continuous_sherry(self, num_obs=1000):
+        """
+        sherry's process to simulate data
+        :param num_obs:
+        :return:
+        """
         A = np.array([[0.6, 0.3, 0.1],
                       [0.1, 0.8, 0.1],
                       [0.1, 0.3, 0.6]])
