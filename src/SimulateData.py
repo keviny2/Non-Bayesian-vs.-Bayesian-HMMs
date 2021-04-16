@@ -105,6 +105,29 @@ class SimulateData:
         """
         return np.random.choice(np.arange(num_states), num_obs)
 
+    def generate_num(self):
+        return np.random.uniform(0, 1)
+
+    def generate_state(self, v, num):
+        for i in range(6):
+            if num < sum(v[:i+1]):
+                a = i
+                return a
+
+    def generate_obs(self, state):
+        if state == 0:
+            a = np.random.normal(0, 2)
+        elif state == 1:
+            a = np.random.normal(5, 2)
+        elif state == 2:
+            a = np.random.normal(10, 2)
+        elif state == 3:
+            a = np.random.normal(15, 2)
+        elif state == 4:
+            a = np.random.normal(20, 2)
+        else:
+            a = np.random.normal(25, 2)
+        return a
 
     def simulate_continuous_sherry(self, num_obs=1000):
         """
@@ -151,27 +174,3 @@ class SimulateData:
 
     def marginal(self, A, init):
         return np.dot(A.T, init)
-
-    def generate_num(self):
-        return np.random.uniform(0, 1)
-
-    def generate_state(self, v, num):
-        for i in range(6):
-            if num < sum(v[:i+1]):
-                a = i
-                return a
-
-    def generate_obs(self, state):
-        if state == 0:
-            a = np.random.normal(0, 2)
-        elif state == 1:
-            a = np.random.normal(5, 2)
-        elif state == 2:
-            a = np.random.normal(10, 2)
-        elif state == 3:
-            a = np.random.normal(15, 2)
-        elif state == 4:
-            a = np.random.normal(20, 2)
-        else:
-            a = np.random.normal(25, 2)
-        return a

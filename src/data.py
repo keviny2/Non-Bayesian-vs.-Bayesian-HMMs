@@ -54,11 +54,11 @@ for i in np.arange(1, 1000):
     state[i] = generate_state(tran, generate_num())
     obs[i] = generate_obs(state[i])
 
-# plt.figure()
-# plt.plot(obs)
-# fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "original")
-# plt.savefig(fname)
-# print("\nFigure saved as '%s'" % fname)
+plt.figure()
+plt.plot(obs)
+fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "original")
+plt.savefig(fname)
+print("\nFigure saved as '%s'" % fname)
 # plt.plot(state)
 # plt.show()
 

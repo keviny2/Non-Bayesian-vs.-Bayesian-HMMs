@@ -1,6 +1,8 @@
 import numpy as np
 from Distribution import normal_pdf, normal_log_pdf
 from SimulateData import SimulateData
+import matplotlib.pyplot as plt
+import os
 
 class MaxLikeHMM:
 
@@ -330,10 +332,60 @@ if __name__ == '__main__':
     data = SimulateData()
     obs, state, A, B, init = data.simulate_continuous_sherry()
 
+    plt.figure()
+    plt.plot(obs)
+    fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "original_observations")
+    plt.savefig(fname)
+    print("\nFigure saved as '%s'" % fname)
+
+    plt.figure()
+    plt.plot(state)
+    fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "original_states")
+    plt.savefig(fname)
+    print("\nFigure saved as '%s'" % fname)
+
     model = MaxLikeHMM(observations=obs)
-    tran = np.array([])
-    A, B, init = model.baum_welch_robust(A, B, init)
-    path, _, _ = model.viterbi_robust(init, A, B)
+    tran_matrix = np.ones((6,6))
+    for i in range(6):
+        for j in range(6):
+            if i == j:
+                tran_matrix[i, j] *= 0.8
+            else:
+                tran_matrix[i, j] *= 0.04
+
+    emis_matrix = np.array([[-5, 5],
+                            [2, 5],
+                            [9, 5],
+                            [16, 5],
+                            [23, 5],
+                            [30, 5]])
+
+    initial = np.ones(6)
+    for i in range(len(obs)):
+        if obs[i] >= np.min(obs) and obs[i] < -1.5:
+            initial[0] += 1
+        elif obs[i] >= 1.5 and obs[i] < 5.5:
+            initial[1] += 1
+        elif obs[i] >= 5.5 and obs[i] < 12.5:
+            initial[2] += 1
+        elif obs[i] >= 12.5 and obs[i] < 19.5:
+            initial[3] += 1
+        elif obs[i] >= 19.5 and obs[i] < 26.5:
+            initial[4] += 1
+        elif obs[i] >= 26.5 and obs[i] <= np.max(obs):
+            initial[5] += 1
+    initial = initial / 1000
+
+    sim_tran, sim_emis, init = model.baum_welch_robust(tran_matrix, emis_matrix, initial)
+    path, _, _ = model.viterbi_robust(initial, sim_tran, sim_emis)
     print(path)
     print(state)
     print(sum(path == state))
+
+
+    plt.figure()
+    plt.plot(path)
+    fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "viterbi_path")
+    plt.savefig(fname)
+    print("\nFigure saved as '%s'" % fname)
+    
