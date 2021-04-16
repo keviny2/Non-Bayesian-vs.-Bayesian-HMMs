@@ -139,10 +139,11 @@ def compute_probabilities(log_probabilities):
     """
     probabilities = np.exp(log_probabilities) / np.sum(np.exp(log_probabilities))  # make probs add up to 1
 
-    if np.sum(probabilities) >= 0.99 and np.sum(probabilities) <= 1.01:  # just in case there is some underflow/overflow stuff
+    if np.sum(probabilities) == 1:  # just in case there is some underflow/overflow stuff
         return probabilities
 
     else:
+        # BUG: the bug may lie here in computing probabilities
         max = np.amax(log_probabilities)
         log_probabilities = log_probabilities - max
         valid_probabilities = np.empty(0)
@@ -153,31 +154,6 @@ def compute_probabilities(log_probabilities):
                 valid_probabilities = np.append(valid_probabilities, 0)
 
         return valid_probabilities / np.sum(valid_probabilities)
-
-
-@jit(nopython=True)
-def simulate_observations(num_obs, initial_state, emission_prob, state_transition):
-    """
-    simulate observations for inference
-
-    :param num_obs: integer number representing number of observations
-    :param initial_state: np array of initial state probabilities
-    :param emission_prob: matrix holding parameters of normal distribution corresponding to each state
-    :param state_transition: stochastic matrix of transition probabilities
-    :return: simulated observations
-    """
-
-    observations = np.zeros(num_obs)
-    state_path = np.zeros(num_obs)
-
-    curr_state = np.argmax(np.random.multinomial(1, initial_state, 1))
-
-    for i in range(num_obs):
-        state_path[i] = curr_state
-        observations[i] = np.random.normal(emission_prob[curr_state, 0], emission_prob[curr_state, 1])
-        curr_state = np.argmax(np.random.multinomial(1, state_transition[curr_state, :]))
-
-    return observations
 
 
 @jit(nopython=True)

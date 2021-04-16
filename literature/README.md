@@ -34,6 +34,12 @@ https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-428
 https://www-tandfonline-com.ezproxy.library.ubc.ca/doi/pdf/10.1198/016214502753479464?needAccess=true
 
 
+### Comparing Bayesian and Non-Bayesian
+------------------------------------
+
+https://www.jstor.org/stable/3316081?seq=1#metadata_info_tab_contents
+
+
 
 ### HMM
 ____________________________________

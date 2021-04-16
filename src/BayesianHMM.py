@@ -104,12 +104,14 @@ class BayesianHMM():
             self.sample_A()
             self.sample_initial_dist()
             self.sample_states()
-            self.chain.append({'mu': self.mu,
-                               'sigma_invsq': self.sigma_invsq,
-                               'beta': self.beta,
-                               'A': self.A,
-                               'initial_dist': self.initial_dist,
-                               'sample_states': self.state_path})
+
+            if i % 100 == 0:
+                self.chain.append({'mu': self.mu,
+                                   'sigma_invsq': self.sigma_invsq,
+                                   'beta': self.beta,
+                                   'A': self.A,
+                                   'initial_dist': self.initial_dist,
+                                   'sample_states': self.state_path})
 
 
     def sample_mu(self):
@@ -189,7 +191,7 @@ class BayesianHMM():
         mus = mus[-max:]
         mus = np.asmatrix(mus)  # row i corresponds to the mus in the chain at iteration i
 
-        x = np.linspace(1, num_iter, num=num_iter)
+        x = np.linspace(1, max, num=max)
 
         for i in range(self.num_states):
             plt.plot(x, mus[:, i])
@@ -197,40 +199,17 @@ class BayesianHMM():
         plt.show()
 
 
-
-
 if __name__ == '__main__':
     np.random.seed(123)
 
-    state_transition = np.array([[0.8, 0.04, 0.05, 0.04, 0.03, 0.04],
-                                 [0.03, 0.85, 0.03, 0.04, 0.02, 0.03],
-                                 [0.02, 0.02, 0.9, 0.02, 0.02, 0.02],
-                                 [0.04, 0.03, 0.09, 0.75, 0.04, 0.05],
-                                 [0.02, 0.04, 0.03, 0.02, 0.87, 0.02],
-                                 [0.01, 0.01, 0.01, 0.01, 0.01, 0.95]])
-
-    # variances need to be the same
-    emission_prob = np.array([[0, 2],
-                              [5, 2],
-                              [10, 2],
-                              [15, 2],
-                              [20, 2],
-                              [25, 2]])
-
-    initial_state = np.ones(state_transition.shape[0]) / state_transition.shape[0]
-
     simulate = SimulateData()
-    observations, state_path, A, B, initial = simulate.simulate_data(state_transition=state_transition,
-                                                                     emission_prob=emission_prob,
-                                                                     initial_state=initial_state,
-                                                                     num_obs=int(1e4),
-                                                                     sherry=False)
+    observations, state_path, A, B, initial = simulate.simulate_continuous(num_obs=int(1e4))
 
     HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=A.shape[0])
     HMM.generate_priors()
 
-    num_iter = int(1e4)
-    HMM.sample_parameters(num_iter=num_iter, num_burnin=int(1e3))
+    num_iter = int(1e3)
+    HMM.sample_parameters(num_iter=num_iter, num_burnin=int(1e2))
 
-    # max = 500
-    HMM.plot_results(num_iter=num_iter)
+    max = 500
+    HMM.plot_results(num_iter=num_iter, max=max)
