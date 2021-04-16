@@ -112,23 +112,29 @@ class SimulateData:
         :param num_obs:
         :return:
         """
-        A = np.array([[0.6, 0.3, 0.1],
-                      [0.1, 0.8, 0.1],
-                      [0.1, 0.3, 0.6]])
+        A = np.array(np.array([[0.8, 0.04, 0.05, 0.04, 0.03, 0.04],
+                                 [0.03, 0.85, 0.03, 0.04, 0.02, 0.03],
+                                 [0.02, 0.02, 0.9, 0.02, 0.02, 0.02],
+                                 [0.04, 0.03, 0.09, 0.75, 0.04, 0.05],
+                                 [0.02, 0.04, 0.03, 0.02, 0.87, 0.02],
+                                 [0.01, 0.01, 0.01, 0.01, 0.01, 0.95]]))
 
-        B = np.array([[-2, 1],
-                     [0, 1],
-                     [2, 1]])
+        B = np.array(np.array([[0, 2],
+                              [5, 2],
+                              [10, 2],
+                              [15, 2],
+                              [20, 2],
+                              [25, 2]]))
 
         converge = False
-        init = np.array([1 / 3, 1 / 3, 1 / 3])
+        init = np.ones(A.shape[0]) / A.shape[0]
         while not converge:
             update = self.marginal(A, init)
             if ((update != init).all()):
                 init = update
             else:
                 converge = True
-        init = np.array([0.2, 0.6, 0.2])
+        print(init)
 
         state = np.zeros(num_obs)
         obs = np.zeros(num_obs)
@@ -150,17 +156,22 @@ class SimulateData:
         return np.random.uniform(0, 1)
 
     def generate_state(self, v, num):
-        n = len(v)
-        for i in range(3):
+        for i in range(6):
             if num < sum(v[:i+1]):
                 a = i
                 return a
 
     def generate_obs(self, state):
         if state == 0:
-            a = np.random.normal(-2, 1)
+            a = np.random.normal(0, 2)
         elif state == 1:
-            a = np.random.normal(0, 1)
+            a = np.random.normal(5, 2)
+        elif state == 2:
+            a = np.random.normal(10, 2)
+        elif state == 3:
+            a = np.random.normal(15, 2)
+        elif state == 4:
+            a = np.random.normal(20, 2)
         else:
-            a = np.random.normal(2, 1)
+            a = np.random.normal(25, 2)
         return a

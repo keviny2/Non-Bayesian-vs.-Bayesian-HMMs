@@ -101,49 +101,6 @@ class MaxLikeHMM:
 
         return {"a": A, "b": B}
 
-    # TODO: implement Baum Welch with robust forward backward implementations?
-    # def baum_welch_continuous(self, A, B, initial, n_iter=100):
-    #     """
-    #
-    #     :param A: state transition matrix
-    #     :param B: [[mu1,sigma1],
-    #                [mu2,sigma2],
-    #                 ....]
-    #     :param initial: initial probabilities
-    #     :param n_iter: number of iterations
-    #     :return: updated state transition and emission matrices
-    #     """
-    #     num_states = A.shape[0]
-    #     T = len(self.observations)
-    #
-    #     for n in range(n_iter):
-    #         alpha = self.forward_continuous(A, B, initial)
-    #         beta = self.backward_continuous(A, B)
-    #
-    #         xi = np.zeros((num_states, num_states, T - 1))
-    #         for t in range(T - 1):
-    #             denominator = np.dot(np.dot(alpha[t, :].T, A) * np.array([normal_pdf(self.observations[t + 1], B[state, 0], B[state, 1]) for state in range(num_states)]).T, beta[t + 1, :])
-    #             for i in range(num_states):
-    #                 numerator = alpha[t, i] * A[i, :] * np.array([normal_pdf(self.observations[t + 1], B[state, 0], B[state, 1]) for state in range(num_states)]).T * beta[t + 1, :].T
-    #                 xi[i, :, t] = numerator / denominator
-    #
-    #         gamma = np.sum(xi, axis=1)
-    #         A = np.sum(xi, 2) / np.sum(gamma, axis=1).reshape((-1, 1))
-    #
-    #         # Add additional T'th element in gamma
-    #         gamma = np.hstack((gamma, np.sum(xi[:, :, T - 2], axis=0).reshape((-1, 1))))
-    #
-    #         # formulas from U of T lecture slides:
-    #         # http://www.utstat.toronto.edu/~rsalakhu/sta4273/notes/Lecture11.pdf
-    #         K = B.shape[0]
-    #         for l in range(K):
-    #             denominator = np.sum(gamma[l, :])
-    #             new_mu = np.dot(gamma[l, :], self.observations)
-    #             new_sigma = np.dot(gamma[l, :], np.square(self.observations - B[l][1]))
-    #             B[l, :] = [new_mu, new_sigma] / denominator
-    #
-    #
-    #     return {"a": A, "b": B}
 
     def eexp(self, x):
         """
@@ -322,7 +279,7 @@ class MaxLikeHMM:
                 for j in range(num_states):
                     loglik_new += self.eexp(gamma[i, j]) * np.log(normal_pdf(self.observations[i], B[j, 0], B[j, 1]))
 
-            if (np.abs(loglik_new - loglik_prev) < 1e-4):
+            if (np.abs(loglik_new - loglik_prev) < 1e-4 or loglik_new < loglik_prev):
                 converge = True
             else:
                 loglik_prev = loglik_new
@@ -354,7 +311,7 @@ class MaxLikeHMM:
 
         for i in range(1, T):
             for j in range(num_states):
-                list = np.zeros(3)
+                list = np.zeros(6)
                 for k in range(num_states):
                     list[k] = self.elnproduct(prob[i-1, k], self.elnproduct(self.eln(A[k, j]),
                                                                                       self.eln(normal_pdf(self.observations[i], B[j, 0], B[j, 1]))))
@@ -370,12 +327,13 @@ class MaxLikeHMM:
         return path, prob, state
 
 if __name__ == '__main__':
+    data = SimulateData()
+    obs, state, A, B, init = data.simulate_continuous_sherry()
 
-    # simulate = SimulateData()
-    # observations, state_path, A, B, initial = simulate.simulate_data(continuous=True)
-    # initial = [0.5, 0.5]
-    # HMM = MaxLikeHMM(observations)
-    # res = HMM.baum_welch_continuous(A, B, initial)
-    # res
-
-    pass
+    model = MaxLikeHMM(observations=obs)
+    tran = np.array([])
+    A, B, init = model.baum_welch_robust(A, B, init)
+    path, _, _ = model.viterbi_robust(init, A, B)
+    print(path)
+    print(state)
+    print(sum(path == state))
