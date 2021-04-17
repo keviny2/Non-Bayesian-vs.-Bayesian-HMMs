@@ -333,18 +333,22 @@ if __name__ == '__main__':
     obs, state, A, B, init = data.simulate_continuous_sherry()
 
     plt.figure()
-    plt.plot(obs)
+    plt.plot(obs[:1000])
+    plt.xlabel("Index")
+    plt.ylabel("Simulated Observations")
     fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "original_observations")
     plt.savefig(fname)
     print("\nFigure saved as '%s'" % fname)
 
     plt.figure()
-    plt.plot(state)
+    plt.plot(state[:1000])
+    plt.xlabel("Index")
+    plt.ylabel("Simulated Hidden States")
     fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "original_states")
     plt.savefig(fname)
     print("\nFigure saved as '%s'" % fname)
 
-    model = MaxLikeHMM(observations=obs)
+    model = MaxLikeHMM(observations=obs[:1000])
     tran_matrix = np.ones((6,6))
     for i in range(6):
         for j in range(6):
@@ -353,15 +357,15 @@ if __name__ == '__main__':
             else:
                 tran_matrix[i, j] *= 0.04
 
-    emis_matrix = np.array([[-5, 5],
-                            [2, 5],
-                            [9, 5],
-                            [16, 5],
-                            [23, 5],
-                            [30, 5]])
+    emis_matrix = np.array([[-5, 7],
+                            [2, 7],
+                            [9, 7],
+                            [16, 7],
+                            [23, 7],
+                            [30, 7]])
 
     initial = np.ones(6)
-    for i in range(len(obs)):
+    for i in range(len(obs[:1000])):
         if obs[i] >= np.min(obs) and obs[i] < -1.5:
             initial[0] += 1
         elif obs[i] >= 1.5 and obs[i] < 5.5:
@@ -377,15 +381,61 @@ if __name__ == '__main__':
     initial = initial / 1000
 
     sim_tran, sim_emis, init = model.baum_welch_robust(tran_matrix, emis_matrix, initial)
-    path, _, _ = model.viterbi_robust(initial, sim_tran, sim_emis)
+    path, _, _ = model.viterbi_robust(init, sim_tran, sim_emis)
     print(path)
-    print(state)
-    print(sum(path == state))
+    print(state[:1000])
+    print(sum(path == state[:1000]))  #915  747
 
 
     plt.figure()
     plt.plot(path)
+    plt.xlabel("Index")
+    plt.ylabel("Estimated Hidden States")
     fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "viterbi_path")
     plt.savefig(fname)
     print("\nFigure saved as '%s'" % fname)
-    
+
+    # sim_tran = np.array([[0.76331548, 0.06240083, 0.04594133, 0.0815152 , 0.00626544,
+    #     0.04056173],
+    #    [0.04275861, 0.76968643, 0.0809278 , 0.01683517, 0.03937972,
+    #     0.05041227],
+    #    [0.02533083, 0.01630721, 0.90764861, 0.03607666, 0.00469835,
+    #     0.00993834],
+    #    [0.05453972, 0.01527269, 0.03202524, 0.78106736, 0.06948663,
+    #     0.04760835],
+    #    [0.0096078 , 0.03852523, 0.03776866, 0.0301672 , 0.85254404,
+    #     0.03138707],
+    #    [0.01064084, 0.0309499 , 0.00764781, 0.00965317, 0.00979895,
+    #     0.93130932]])
+    # sim_emis = np.array([[ 0,  1],
+    #    [ 4,  2],
+    #    [ 9,  2],
+    #    [13,  2],
+    #    [20,  2],
+    #    [25,  2]])
+    #
+    # init = np.array([3.46758931e-19, 6.22713998e-03, 9.77398372e-01, 1.63744876e-02,
+    #    5.31935101e-38, 2.64969723e-86])
+
+    model_test = MaxLikeHMM(observations=obs[1000:])
+    test_path, _, _ = model_test.viterbi_robust(init, sim_tran, sim_emis)
+    print(test_path)
+    print(state[1000:])
+    print(sum(test_path == state[1000:]))  #187  157
+
+    plt.figure()
+    plt.plot(state[1000:])
+    plt.xlabel("Index")
+    plt.ylabel("Estimated Hidden States")
+    fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "test_state")
+    plt.savefig(fname)
+    print("\nFigure saved as '%s'" % fname)
+
+    plt.figure()
+    plt.plot(test_path)
+    plt.xlabel("Index")
+    plt.ylabel("Estimated Hidden States")
+    fname = os.path.join("/Users/xiaoxuanliang/Desktop/STAT 520A/STAT-520A-Project", "plots", "viterbi_test_path")
+    plt.savefig(fname)
+    print("\nFigure saved as '%s'" % fname)
+
