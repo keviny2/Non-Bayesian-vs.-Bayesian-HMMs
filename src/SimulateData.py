@@ -1,5 +1,4 @@
 import numpy as np
-from numba_functions import simulate_observations
 
 class SimulateData:
 
@@ -50,6 +49,9 @@ class SimulateData:
         :return:
         """
         return np.random.choice(np.arange(num_states), num_obs)
+
+    def marginal(self, A, init):
+        return np.dot(A.T, init)
 
     def generate_num(self):
         return np.random.uniform(0, 1)
@@ -116,7 +118,3 @@ class SimulateData:
             obs[i] = self.generate_obs(state[i])
 
         return obs, state, A, B, init
-
-
-    def marginal(self, A, init):
-        return np.dot(A.T, init)

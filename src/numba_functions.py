@@ -143,7 +143,6 @@ def compute_probabilities(log_probabilities):
         return probabilities
 
     else:
-        # BUG: the bug may lie here in computing probabilities
         max = np.amax(log_probabilities)
         log_probabilities = log_probabilities - max
         valid_probabilities = np.empty(0)
