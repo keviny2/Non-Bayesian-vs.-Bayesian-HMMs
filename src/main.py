@@ -1,4 +1,6 @@
 from crossValidation import crossValidation
+import Plot
 
+# maxlik
 cv = crossValidation()
-print(cv)
+cv.training_rate(Maxlike=True, Bayesian = False)
