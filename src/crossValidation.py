@@ -2,7 +2,6 @@ from SimulateData import SimulateData
 from MaxLikeHMM import MaxLikeHMM
 from BayesianHMM import BayesianHMM
 import numpy as np
-from Plot import plot
 
 class crossValidation:
 
@@ -10,9 +9,9 @@ class crossValidation:
         self.data = data
         self.num_states = num_states
 
-    def training_rate(self, Maxlike, Bayesian):
+    def training_rate(self, MaxLike, BayesianLike):
 
-        if Maxlike == True:
+        if MaxLike == True:
 
             self.obs, self.state, _, _, _ = self.data.simulate_continuous(num_obs=1200)
             self.train_obs = self.obs[:1000]
@@ -31,45 +30,69 @@ class crossValidation:
             self.sim_emis = sim_emis
             self.sim_init = sim_init
 
-            plot(self.train_obs, ylabel = "Simulated Observations", name = "Max_Original_Observations")
-            plot(self.train_state, ylabel = "Simulated Hidden States", name = "Max_Original_States")
-            plot(path, ylabel = "Estimated Hidden States", name = "Max_Viterbi_Path")
-
-            return rate
-
-        elif Bayesian == True:
-
-            self.observations, self.state_path, A, B, initial = self.data.simulate_continuous(num_obs = 1.2e4)
-            self.train_obs = self.obs[:1e4]
-            self.test_obs = self.obs[1e4:]
-            self.train_state = self.state[:1e4]
-            self.test_state = self.state[1e4:]
-
-            HMM = BayesianHMM(observations=self.train_obs, state_path=self.train_state, num_states = self.num_states)
-            HMM.generate_priors()
-
-            num_iter = int(1e3)
-            HMM.sample_parameters(num_iter=num_iter, num_burnin=int(1e2))
-            path = HMM.sample_states()
-            rate = np.sum(path == self.train_state)/len(self.train_state)
-
-            return rate
-
-
-    def test_rate(self, Maxlike, BayesianLike):
-
-        if Maxlike == True:
-
-            test_path, _, _ = self.model.viterbi_robust(self.test_obs,self.sim_init, self.sim_tran, self.sim_emis)
-            rate = np.sum(test_path == self.state[1000:])/200 # 187  157
-
-            plot(self.test_state, ylabel="Simulated Hidden States", name="Max_Test_States")
-            plot(test_path, ylabel="Estimated Hidden States", name="Max_Viterbi_Test_Path")
+            self.model.plot(self.train_obs, ylabel = "Simulated Observations", name = "Max_Original_Observations")
+            self.model.plot(self.train_state, ylabel = "Simulated Hidden States", name = "Max_Original_States")
+            self.model.plot(path, ylabel = "Estimated Hidden States", name = "Max_Viterbi_Path")
 
             return rate
 
         elif BayesianLike == True:
-            model_test = BayesianHMM(observations=self.observations[1e4:])
-            test_path = model_test.sample_states()
-            rate = np.sum(test_path == self.state_path[:1e4])/2e3
+
+            self.observations, self.state_path, A, B, initial = self.data.simulate_continuous(num_obs = 12000)
+            self.train_obs = self.obs[:10000]
+            self.test_obs = self.obs[10000:]
+            self.train_state = self.state[:10000]
+            self.test_state = self.state[10000:]
+
+            '''
+            first 10000 observations and hidden states work as training set
+            remaining 2000 observations and hidden states work as test set
+            '''
+
+            self.HMM = BayesianHMM(observations=self.train_obs, state_path=self.train_state, num_states = self.num_states)
+            self.HMM.generate_priors()
+
+            self.num_iter = int(1000)
+            self.HMM.sample_parameters(num_iter=self.num_iter, num_burnin=int(100))
+
+            path = self.HMM.sample_states()
+
+            '''
+            Does line 53 return the predicted path for training set? not pretty sure ;-;
+            '''
+            rate = np.sum(path == self.train_state)/len(self.train_state)
+
+            '''
+            Edit the plot_results function from BayesianHMM!! Instead of showing them, the plots are saved in plots folder
+            '''
+            self.HMM.plot_results(num_iter= self.num_iter, max=max, name="Bayes_Original_Observations")
+            self.HMM.plot_results(num_iter= self.num_iter, max=max, name="Bayes_Original_States")
+            self.HMM.plot_results(num_iter= self.num_iter, max=max,  name="Bayes_Predicted_Path")
+
+            return rate
+
+    def test_rate(self, MaxLike, BayesianLike):
+
+        if MaxLike == True:
+
+            test_path, _, _ = self.model.viterbi_robust(self.test_obs,self.sim_init, self.sim_tran, self.sim_emis)
+            rate = np.sum(test_path == self.state[1000:])/200 # 187  157
+
+            self.model.plot(self.test_state, ylabel="Simulated Hidden States", name="Max_Test_States")
+            self.model.plot(test_path, ylabel="Estimated Hidden States", name="Max_Viterbi_Test_Path")
+
+            return rate
+
+        elif BayesianLike == True:
+
+            '''
+            find the test_path here!!
+            '''
+            test_path = self.HMM.sample_states()
+            rate = np.sum(test_path == self.state_path[10000:])/2000
+
+
+            self.HMM.plot_results(num_iter= self.num_iter, max=max, name="Bayes_Test_States")
+            self.HMM.plot_results(num_iter= self.num_iter, max=max, name="Bayes_Predicted_Test_Path")
+
             return rate

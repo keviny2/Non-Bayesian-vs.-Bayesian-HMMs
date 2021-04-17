@@ -1,16 +1,21 @@
 from crossValidation import crossValidation
-import Plot
 
 '''
 MaxLike
 '''
 # model = crossValidation()
-# train_rate = model.training_rate(Maxlike=True, Bayesian = False)
+# train_rate = model.training_rate(MaxLike=True, BayesianLike = False)
 # print(train_rate)  #0.803
-# test_rate = model.test_rate(Maxlike=True, BayesianLike=False)
+# test_rate = model.test_rate(MaxLike=True, BayesianLike=False)
 # print(test_rate)  #0.845
 
 
 '''
 BayesLike
 '''
+
+model = crossValidation()
+train_rate = model.training_rate(MaxLike=False, BayesianLike = True)
+print(train_rate)
+test_rate = model.test_rate(MaxLike =True, BayesianLike = True)
+print(test_rate)
