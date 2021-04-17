@@ -77,7 +77,9 @@ class SimulateData:
             a = np.random.normal(25, 2)
         return a
 
-    def simulate_continuous(self, num_obs=1000):
+
+    def simulate_continuous(self, num_obs=1200):
+
         """
         sherry's process to simulate data
         :param num_obs:
