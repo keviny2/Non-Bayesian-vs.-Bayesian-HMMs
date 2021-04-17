@@ -38,7 +38,7 @@ class crossValidation:
 
         elif BayesianLike == True:
 
-            self.observations, self.state_path, A, B, initial = self.data.simulate_continuous(num_obs = 12000)
+            self.obs, self.state, A, B, initial = self.data.simulate_continuous(num_obs = 12000)
             self.train_obs = self.obs[:10000]
             self.test_obs = self.obs[10000:]
             self.train_state = self.state[:10000]
@@ -52,10 +52,10 @@ class crossValidation:
             self.HMM = BayesianHMM(observations=self.train_obs, state_path=self.train_state, num_states = self.num_states)
             self.HMM.generate_priors()
 
-            self.num_iter = int(1000)
-            self.HMM.sample_parameters(num_iter=self.num_iter, num_burnin=int(100))
+            self.num_iter = int(100)
+            self.HMM.sample_parameters(num_iter=self.num_iter, num_burnin=int(10))
 
-            path = self.HMM.sample_states()
+            path = self.HMM.state_path
 
             '''
             Does line 53 return the predicted path for training set? not pretty sure ;-;
@@ -65,9 +65,9 @@ class crossValidation:
             '''
             Edit the plot_results function from BayesianHMM!! Instead of showing them, the plots are saved in plots folder
             '''
-            self.HMM.plot_results(num_iter= self.num_iter, max=max, name="Bayes_Original_Observations")
-            self.HMM.plot_results(num_iter= self.num_iter, max=max, name="Bayes_Original_States")
-            self.HMM.plot_results(num_iter= self.num_iter, max=max,  name="Bayes_Predicted_Path")
+            self.HMM.plot_results(num_iter=self.num_iter, max=None, name="Bayes_Original_Observations")
+            self.HMM.plot_results(num_iter=self.num_iter, max=None, name="Bayes_Original_States")
+            self.HMM.plot_results(num_iter=self.num_iter, max=None,  name="Bayes_Predicted_Path")
 
             return rate
 
@@ -88,11 +88,11 @@ class crossValidation:
             '''
             find the test_path here!!
             '''
-            test_path = self.HMM.sample_states()
+            test_path = self.HMM.state_path
             rate = np.sum(test_path == self.state_path[10000:])/2000
 
 
-            self.HMM.plot_results(num_iter= self.num_iter, max=max, name="Bayes_Test_States")
-            self.HMM.plot_results(num_iter= self.num_iter, max=max, name="Bayes_Predicted_Test_Path")
+            self.HMM.plot_results(num_iter= self.num_iter, max=None, name="Bayes_Test_States")
+            self.HMM.plot_results(num_iter= self.num_iter, max=None, name="Bayes_Predicted_Test_Path")
 
             return rate

@@ -106,13 +106,13 @@ class BayesianHMM():
             self.sample_initial_dist()
             self.sample_states()
 
-            if i % 100 == 0:
-                self.chain.append({'mu': self.mu,
-                                   'sigma_invsq': self.sigma_invsq,
-                                   'beta': self.beta,
-                                   'A': self.A,
-                                   'initial_dist': self.initial_dist,
-                                   'sample_states': self.state_path})
+            # if i % 100 == 0:
+            self.chain.append({'mu': self.mu,
+                               'sigma_invsq': self.sigma_invsq,
+                               'beta': self.beta,
+                               'A': self.A,
+                               'initial_dist': self.initial_dist,
+                               'sample_states': self.state_path})
 
 
     def sample_mu(self):

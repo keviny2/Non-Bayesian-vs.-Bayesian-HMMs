@@ -1,6 +1,5 @@
 import numpy as np
 from Distribution import normal_pdf
-from SimulateData import SimulateData
 import matplotlib.pyplot as plt
 import os
 
