@@ -109,12 +109,12 @@ class SimulateData:
                 converge = True
         print(init)
 
-        state = np.zeros(num_obs)
-        obs = np.zeros(num_obs)
+        state = np.zeros(int(num_obs))
+        obs = np.zeros(int(num_obs))
         state[0] = self.generate_state(init, self.generate_num())
         obs[0] = self.generate_obs(state[0])
 
-        for i in np.arange(1, num_obs):
+        for i in np.arange(1, num_obs, dtype = int):
             tran = A[int(state[i - 1])]
             state[i] = self.generate_state(tran, self.generate_num())
             obs[i] = self.generate_obs(state[i])

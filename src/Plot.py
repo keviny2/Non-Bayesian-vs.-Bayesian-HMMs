@@ -2,11 +2,11 @@ import os
 import matplotlib.pyplot as plt
 
 
-def plot(data, xlabel, ylabel, name):
+def plot(data, ylabel, name):
     plt.figure()
     plt.plot(data)
-    plt.xlabel(xlabel)
+    plt.xlabel("Index")
     plt.ylabel(ylabel)
-    fname = os.path.join("", "plots", name)
+    fname = os.path.join("..", "plots", name)
     plt.savefig(fname)
     print("\nFigure saved as '%s'" % fname)
