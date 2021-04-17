@@ -330,7 +330,7 @@ class MaxLikeHMM:
 
 if __name__ == '__main__':
     data = SimulateData()
-    obs, state, A, B, init = data.simulate_continuous_sherry()
+    obs, state, A, B, init = data.simulate_continuous()
 
     plt.figure()
     plt.plot(obs[:1000])
