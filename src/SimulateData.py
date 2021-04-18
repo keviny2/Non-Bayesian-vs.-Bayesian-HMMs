@@ -119,4 +119,4 @@ class SimulateData:
             state[i] = self.generate_state(tran, self.generate_num())
             obs[i] = self.generate_obs(state[i])
 
-        return obs, state, A, B, init
+        return obs, state

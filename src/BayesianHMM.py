@@ -177,7 +177,7 @@ class BayesianHMM():
         self.state_path = new_state_path
 
 
-    def plot_results(self, num_iter, max=None, name = "Bayes_plot"):
+    def plot_mu(self, num_iter, max=None, name = "Bayes_plot"):
         """
         plot the path of mus in MCMC chain
         :param num_iter:
@@ -198,6 +198,16 @@ class BayesianHMM():
         for i in range(self.num_states):
             plt.plot(x, mus[:, i])
 
+        fname = os.path.join("..", "plots", name)
+        plt.savefig(fname)
+        print("\nFigure saved as '%s'" % fname)
+
+
+    def plot(self, data, ylabel, name):
+        plt.figure()
+        plt.plot(data)
+        plt.xlabel("Index")
+        plt.ylabel(ylabel)
         fname = os.path.join("..", "plots", name)
         plt.savefig(fname)
         print("\nFigure saved as '%s'" % fname)

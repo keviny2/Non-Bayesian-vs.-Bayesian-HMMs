@@ -250,6 +250,7 @@ class MaxLikeHMM:
 
         return path, prob, state
 
+
     def plot(self, data, ylabel, name):
         plt.figure()
         plt.plot(data)

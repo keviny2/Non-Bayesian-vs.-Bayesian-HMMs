@@ -1,4 +1,4 @@
-from CrossValidation import crossValidation
+from CrossValidation import CrossValidation
 
 if __name__ == "__main__":
 
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     BayesLike
     '''
 
-    model = crossValidation()
+    model = CrossValidation()
     train_rate = model.training_rate(MaxLike=False, BayesianLike = True)
     print(train_rate)
     test_rate = model.test_rate(MaxLike =True, BayesianLike = True)
