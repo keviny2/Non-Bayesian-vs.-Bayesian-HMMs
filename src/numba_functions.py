@@ -1,6 +1,6 @@
 import numpy as np
 from numba import jit
-from Distribution import normal_log_pdf
+from distribution import normal_log_pdf
 
 
 @jit(nopython=True)

@@ -1,4 +1,4 @@
-from CrossValidation import CrossValidation
+from cross_validation import CrossValidation
 
 if __name__ == "__main__":
 
@@ -21,7 +21,8 @@ if __name__ == "__main__":
     for i in range(100):
         # ... arr = np.array()
         model = CrossValidation(bayesian = bayesian)
-        train_rate = model.train(num_obs=1000)
-        print(train_rate)
-        test_rate = model.test()
-        print(test_rate)
+        state_path, test_set, test_state_path = model.train(num_training=1200,
+                                                            num_test=200,
+                                                            num_iter=100,
+                                                            num_burnin=100)
+        model.test(state_path, test_set, test_state_path)

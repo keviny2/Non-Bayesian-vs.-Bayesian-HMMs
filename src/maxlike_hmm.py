@@ -1,7 +1,7 @@
 import numpy as np
 
-from Distribution import normal_pdf
-from HMM import HMM
+from distribution import normal_pdf
+from hmm import HMM
 
 class MaxLikeHMM(HMM):
 

@@ -1,8 +1,11 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import os
+import copy
 
-from SimulateData import SimulateData
+from simulate import SimulateData
 from numba_functions import backward_robust, sample_states_numba
-from HMM import HMM
+from hmm import HMM
 
 
 class BayesianHMM(HMM):
@@ -18,7 +21,7 @@ class BayesianHMM(HMM):
         self.state_path = np.array(state_path)
         self.num_obs = len(self.observations)
         self.num_states = num_states
-        self.chain = []
+        self.chain = np.array([])
 
         # model parameters initially set to None
         self.initial_dist = None
@@ -87,7 +90,6 @@ class BayesianHMM(HMM):
         for i in range(num_burnin):
             print('(B) Iteration:', i+1)
 
-            # TODO: (KEVIN) look into plotting mu traceplot (seems like it changes but scale is not optimal)
             self.sample_mu()
             self.sample_sigma_invsq()
             self.sample_beta()
@@ -108,12 +110,12 @@ class BayesianHMM(HMM):
             self.sample_states()
 
             # if i % 100 == 0:
-            self.chain.append({'mu': self.mu,
-                               'sigma_invsq': self.sigma_invsq,
-                               'beta': self.beta,
-                               'A': self.A,
-                               'initial_dist': self.initial_dist,
-                               'sample_states': self.state_path})
+            self.chain = np.append(self.chain, {'mu': copy.deepcopy(self.mu),
+                                                'sigma_invsq': copy.deepcopy(self.sigma_invsq),
+                                                'beta': copy.deepcopy(self.beta),
+                                                'A': copy.deepcopy(self.A),
+                                                'initial_dist': copy.deepcopy(self.initial_dist),
+                                                'sample_states': copy.deepcopy(self.state_path)})
 
 
     def sample_mu(self):
@@ -183,10 +185,13 @@ if __name__ == '__main__':
     np.random.seed(123)
 
     simulate = SimulateData()
-    observations, state_path, A, B, initial = simulate.simulate_continuous(num_obs=int(1e4))
+    observations, state_path = simulate.simulate_continuous(num_obs=int(1e3))
 
-    HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=A.shape[0])
+    HMM = BayesianHMM(observations=observations, state_path=state_path, num_states=6)
     HMM.generate_priors()
 
     num_iter = int(1e3)
     HMM.sample_parameters(num_iter=num_iter, num_burnin=int(1e2))
+
+    max = 500
+    HMM.plot_results(num_iter=num_iter, max=max)

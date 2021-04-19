@@ -1,15 +1,7 @@
 import numpy as np
-from Distribution import normal_pdf
+from distribution import normal_pdf
 
 class HMM():
-
-    def __init__(self):
-        self.A
-        self.B
-        self.init
-        self.obser
-
-    # TODO: (KEVIN) honestly this class is totally wrong, don't think i need
 
     def eexp(self, x):
         """
