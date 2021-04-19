@@ -21,7 +21,7 @@ if __name__ == "__main__":
     for i in range(100):
         # ... arr = np.array()
         model = CrossValidation(bayesian = bayesian)
-        state_path, test_set, test_state_path = model.train(num_training=1200,
+        state_path, test_set, test_state_path = model.train(num_training=1000,
                                                             num_test=200,
                                                             num_iter=100,
                                                             num_burnin=100)

@@ -14,7 +14,7 @@ class CrossValidation:
         self.model = None  # will either be a Bayesian or a MaxLike model
 
 
-    def train(self, num_training=1200, num_test=200, num_iter=10000, num_burnin=1000):
+    def train(self, num_training=1000, num_test=200, num_iter=10000, num_burnin=1000):
         """
 
         :param num_training: size of the training set for cv
@@ -24,15 +24,14 @@ class CrossValidation:
         :return:
         """
 
-        obs, state_path = self.data.simulate_continuous(num_obs=num_training)
+        obs, state_path = self.data.simulate_continuous(num_obs=num_training+num_test)
 
         # TODO: (SHERRY) KDE plot
 
-        index = num_training - num_test
-        training_set = obs[:index]
-        test_set = obs[index:]
-        training_state_path = state_path[:index]
-        test_state_path = state_path[index:]
+        training_set = obs[:num_training]
+        test_set = obs[-num_test:]
+        training_state_path = state_path[:num_training]
+        test_state_path = state_path[-num_test:]
 
 
         if self.bayesian:
