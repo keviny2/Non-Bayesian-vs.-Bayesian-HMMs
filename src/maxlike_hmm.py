@@ -118,6 +118,8 @@ class MaxLikeHMM(HMM):
         converge = False
         loglik_prev = - np.inf
 
+        print("=" * 20, 'Beginning Baum-Welch!', '=' * 20)
+        iter = 1
         while not converge:
             alpha = self.forward_robust(A, B, initial)
             beta = self.backward_robust(A, B)
@@ -170,5 +172,9 @@ class MaxLikeHMM(HMM):
                 converge = True
             else:
                 loglik_prev = loglik_new
+
+            print('Iteration:', iter)
+            print('Log-likelihood:', loglik_new)
+            iter += 1
 
         return A, B, initial

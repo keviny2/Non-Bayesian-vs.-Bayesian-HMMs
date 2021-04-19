@@ -4,7 +4,7 @@ from cross_validation import CrossValidation
 
 if __name__ == "__main__":
 
-    cv_iter = 100
+    cv_iter = 10
     train_bayesian = np.array([None] * cv_iter)
     test_bayesian = np.array([None] * cv_iter)
 
@@ -14,7 +14,7 @@ if __name__ == "__main__":
     num_training = 1000
     num_test = 200
 
-    bayesian = True
+    bayesian = False
     if bayesian == True:
         num_iter = 100
         num_burnin = 100

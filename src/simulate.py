@@ -107,7 +107,6 @@ class SimulateData:
                 init = update
             else:
                 converge = True
-        print(init)
 
         state = np.zeros(int(num_obs))
         obs = np.zeros(int(num_obs))
