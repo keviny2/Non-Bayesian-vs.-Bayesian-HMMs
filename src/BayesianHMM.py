@@ -203,15 +203,6 @@ class BayesianHMM():
         print("\nFigure saved as '%s'" % fname)
 
 
-    def plot(self, data, ylabel, name):
-        plt.figure()
-        plt.plot(data)
-        plt.xlabel("Index")
-        plt.ylabel(ylabel)
-        fname = os.path.join("..", "plots", name)
-        plt.savefig(fname)
-        print("\nFigure saved as '%s'" % fname)
-
 
 if __name__ == '__main__':
     np.random.seed(123)

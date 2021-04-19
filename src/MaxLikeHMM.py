@@ -222,6 +222,7 @@ class MaxLikeHMM:
 
         return A, B, initial
 
+
     def viterbi_robust(self, data, initial, A, B):
         nrow = len(data)
 

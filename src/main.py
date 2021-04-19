@@ -16,8 +16,8 @@ if __name__ == "__main__":
     BayesLike
     '''
 
-    model = CrossValidation()
-    train_rate = model.training_rate(MaxLike=False, BayesianLike = True)
+    model = CrossValidation(bayesian = True)
+    train_rate = model.train()
     print(train_rate)
-    test_rate = model.test_rate(MaxLike =True, BayesianLike = True)
+    test_rate = model.test()
     print(test_rate)

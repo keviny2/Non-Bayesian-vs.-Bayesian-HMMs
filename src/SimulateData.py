@@ -81,7 +81,7 @@ class SimulateData:
     def simulate_continuous(self, num_obs=1200):
 
         """
-        sherry's process to simulate data
+        simulate continuous data
         :param num_obs:
         :return:
         """
