@@ -4,7 +4,6 @@ from Distribution import normal_pdf
 from HMM import HMM
 
 class MaxLikeHMM(HMM):
-    # NOTE: yet to integrate numba into this class
 
     def __init__(self, observations = None, num_states = 6):
 

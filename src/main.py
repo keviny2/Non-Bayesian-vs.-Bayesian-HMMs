@@ -17,6 +17,7 @@ if __name__ == "__main__":
     '''
     bayesian = True
 
+    # TODO: (SHERRY) finish up cv
     for i in range(100):
         # ... arr = np.array()
         model = CrossValidation(bayesian = bayesian)

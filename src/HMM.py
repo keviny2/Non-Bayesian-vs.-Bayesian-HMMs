@@ -9,7 +9,7 @@ class HMM():
         self.init
         self.obser
 
-    # NOTE: honestly this class is totally wrong, don't think i need
+    # TODO: (KEVIN) honestly this class is totally wrong, don't think i need
 
     def eexp(self, x):
         """

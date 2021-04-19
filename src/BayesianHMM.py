@@ -87,7 +87,7 @@ class BayesianHMM(HMM):
         for i in range(num_burnin):
             print('(B) Iteration:', i+1)
 
-            # TODO: look into plotting mu traceplot (seems like it changes but scale is not optimal)
+            # TODO: (KEVIN) look into plotting mu traceplot (seems like it changes but scale is not optimal)
             self.sample_mu()
             self.sample_sigma_invsq()
             self.sample_beta()

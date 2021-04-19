@@ -18,6 +18,7 @@ class CrossValidation:
 
         obs, self.state_path = self.data.simulate_continuous(num_obs=num_obs)
 
+        # TODO: (SHERRY) KDE plot
 
         index = num_obs-num_test
         train_obs = obs[:index]
@@ -74,7 +75,7 @@ class CrossValidation:
 
             B = [[mu, np.sqrt(1/self.HMM.sigma_invsq)] for mu in self.HMM.mu]
             test_path, _, _ = self.HMM.viterbi_robust(self.test_obs, self.HMM.initial_dist, self.HMM.A, np.array(B))
-            # NOTE: can probably just use self.HMM.state_path[1000:]
+            # TODO: (KEVIN) can probably just use self.HMM.state_path[1000:]
             rate = np.sum(test_path == self.state_path[1000:])/200
 
 
@@ -92,7 +93,6 @@ class CrossValidation:
             self.plot(test_path, ylabel="Estimated Hidden States", name="Max_Viterbi_Test_Path")
 
             return rate
-
 
     def plot(self, data, ylabel, name):
         plt.figure()
