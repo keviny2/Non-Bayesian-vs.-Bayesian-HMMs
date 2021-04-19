@@ -11,15 +11,14 @@ class CrossValidation:
         self.data = SimulateData()
         self.num_states = num_states
 
-        # NOTE: keeping values you use multiple times is good for class variable
         self.bayesian = bayesian
 
-    # NOTE: num_obs and num_test should go in init!
+
     def train(self, num_obs=1200, num_test=200):
 
-        # NOTE: initializing class parameters outside of init
         obs, self.state_path = self.data.simulate_continuous(num_obs=num_obs)
-        
+
+
         index = num_obs-num_test
         train_obs = obs[:index]
         self.test_obs = obs[index:]
@@ -41,20 +40,14 @@ class CrossValidation:
             self.HMM.sample_parameters(num_iter=self.num_iter, num_burnin=int(100))
 
             path = self.HMM.state_path
-
-            '''
-            Does line 53 return the predicted path for training set? not pretty sure ;-;
-            '''
             rate = np.sum(path == train_state_path)/len(train_state_path)
 
-            '''
-            Edit the plot_results function from BayesianHMM!! Instead of showing them, the plots are saved in plots folder
-            '''
             self.plot(train_obs, ylabel = "Simulated Observations", name = "Bayes_Original_Observations")
             self.plot(train_state_path, ylabel = "Simulated Hidden States", name = "Bayes_Original_States")
             self.plot(path, ylabel = "Estimated Hidden States", name = "Bayes_Viterbi_Path")
 
             return rate
+
 
         else:
 
@@ -81,6 +74,7 @@ class CrossValidation:
 
             B = [[mu, np.sqrt(1/self.HMM.sigma_invsq)] for mu in self.HMM.mu]
             test_path, _, _ = self.HMM.viterbi_robust(self.test_obs, self.HMM.initial_dist, self.HMM.A, np.array(B))
+            # NOTE: can probably just use self.HMM.state_path[1000:]
             rate = np.sum(test_path == self.state_path[1000:])/200
 
 
@@ -105,6 +99,12 @@ class CrossValidation:
         plt.plot(data)
         plt.xlabel("Index")
         plt.ylabel(ylabel)
-        fname = os.path.join("..", "plots", name)
+
+        if self.bayesian:
+            fname = os.path.join("..", "plots", 'bayesian', name)
+
+        else:
+            fname = os.path.join("..", "plots", 'maxlike', name)
+
         plt.savefig(fname)
         print("\nFigure saved as '%s'" % fname)

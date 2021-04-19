@@ -3,7 +3,13 @@ from Distribution import normal_pdf
 
 class HMM():
 
-    # NOTE: honestly this class is j
+    def __init__(self):
+        self.A
+        self.B
+        self.init
+        self.obser
+
+    # NOTE: honestly this class is totally wrong, don't think i need
 
     def eexp(self, x):
         """

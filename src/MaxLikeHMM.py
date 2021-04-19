@@ -172,5 +172,4 @@ class MaxLikeHMM(HMM):
             else:
                 loglik_prev = loglik_new
 
-
         return A, B, initial
