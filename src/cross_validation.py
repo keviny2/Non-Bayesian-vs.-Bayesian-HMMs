@@ -71,8 +71,8 @@ class CrossValidation:
             plot(path, ylabel = "Estimated Hidden States", name = "Max_Viterbi_Path",bayesian=False)
 
         
-        print("Training Rate:", rate)
-        return state_path, test_set, test_state_path
+        # print("Training Rate:", rate)
+        return rate, state_path, test_set, test_state_path
 
     def test(self, state_path, test_set, test_state_path):
 
@@ -98,6 +98,7 @@ class CrossValidation:
             plot(test_path, ylabel="Estimated Hidden States", name="Max_Viterbi_Test_Path", bayesian=False)
 
 
-        print("Test Rate:", rate)
+        # print("Test Rate:", rate)
+        return rate
 
 
