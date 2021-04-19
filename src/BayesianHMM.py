@@ -1,11 +1,11 @@
-import os
 import numpy as np
+
 from SimulateData import SimulateData
 from numba_functions import backward_robust, sample_states_numba
-import matplotlib.pyplot as plt
+from HMM import HMM
 
 
-class BayesianHMM():
+class BayesianHMM(HMM):
 
     def __init__(self, observations=None, state_path=None, num_states=6):
         """
@@ -177,32 +177,6 @@ class BayesianHMM():
         self.state_path = new_state_path
 
 
-    def plot_mu(self, num_iter, max=None, name = "Bayes_plot"):
-        """
-        plot the path of mus in MCMC chain
-        :param num_iter:
-        :param max:
-        :return:
-        """
-
-        if max is None:
-            max = num_iter
-
-        mus = [entry['mu'] for entry in self.chain]
-        mus = mus[-max:]
-        mus = np.asmatrix(mus)  # row i corresponds to the mus in the chain at iteration i
-
-        x = np.linspace(1, max, num=max)
-        plt.figure()
-
-        for i in range(self.num_states):
-            plt.plot(x, mus[:, i])
-
-        fname = os.path.join("..", "plots", name)
-        plt.savefig(fname)
-        print("\nFigure saved as '%s'" % fname)
-
-
 
 if __name__ == '__main__':
     np.random.seed(123)
@@ -215,6 +189,3 @@ if __name__ == '__main__':
 
     num_iter = int(1e3)
     HMM.sample_parameters(num_iter=num_iter, num_burnin=int(1e2))
-
-    max = 500
-    HMM.plot_results(num_iter=num_iter, max=max)
