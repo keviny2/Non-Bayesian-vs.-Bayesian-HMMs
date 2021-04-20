@@ -50,13 +50,10 @@ def plot_mu(chain, num_states, num_iter, max=None, name = "mu trace plots"):
     print("\nFigure saved as '%s'" % fname)
 
 
-def KDEplot():
-    data = SimulateData()
-    obs, _ = data.simulate_continuous(num_obs = 1200)
+def KDEplot(data):
+
     sns.set_style('whitegrid')
-    sns.kdeplot(obs)
-    sns.distplot(obs, hist = True)
-    plt.show()
-    # fname = os.path.join("..", "plots", "KDE")
-    # plt.savefig(fname)
-    # print("\nFigure saved as '%s'" % fname)
+    sns.displot(data, kde = True)
+    fname = os.path.join("..", "plots", "KDE")
+    plt.savefig(fname)
+    print("\nFigure saved as '%s'" % fname)
