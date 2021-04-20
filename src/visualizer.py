@@ -22,7 +22,7 @@ def plot(data, ylabel, name, bayesian):
     print("\nFigure saved as '%s'" % fname)
 
 
-def plot_mu(chain, num_states, num_iter, max=None, name = "mu trace plots"):
+def plot_mu(chain, num_states, num_iter, max=None, name = "mu_trace_plots"):
     """
     plot the path of mus in MCMC chain
     :param num_iter: number of iterations in the chain
@@ -53,7 +53,7 @@ def plot_mu(chain, num_states, num_iter, max=None, name = "mu trace plots"):
 def KDEplot(data):
 
     sns.set_style('whitegrid')
-    sns.displot(data, kde = True)
+    sns.distplot(data, kde=True)
     fname = os.path.join("..", "plots", "KDE")
     plt.savefig(fname)
     print("\nFigure saved as '%s'" % fname)

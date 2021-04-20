@@ -29,8 +29,7 @@ class CrossValidation:
         obs, state_path = self.data.simulate_continuous(num_obs=self.num_training+self.num_test)
 
 
-        # TODO: (SHERRY) KDE plot
-        # KDEplot(obs)
+        KDEplot(obs)
         training_set = obs[:self.num_training]
         test_set = obs[-self.num_test:]
         training_state_path = state_path[:self.num_training]
@@ -54,7 +53,7 @@ class CrossValidation:
             # plot(training_set, ylabel = "Simulated Observations", name = "Bayes_Original_Observations", bayesian=True)
             # plot(training_state_path, ylabel = "Simulated Hidden States", name = "Bayes_Original_States",bayesian=True)
             # plot(path, ylabel = "Estimated Hidden States", name = "Bayes_Viterbi_Path", bayesian=True)
-            # plot_mu(chain=self.model.chain, num_states=self.model.num_states, num_iter=num_iter)
+            plot_mu(chain=self.model.chain, num_states=self.model.num_states, num_iter=num_iter)
 
 
         else:

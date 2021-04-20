@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     bayesian = True
     if bayesian == True:
-        num_iter = 100
+        num_iter = 10000
         num_burnin = 100
 
         for i in range(cv_iter):
