@@ -29,8 +29,7 @@ class CrossValidation:
         obs, state_path = self.data.simulate_continuous(num_obs=self.num_training+self.num_test)
 
 
-        # TODO: (SHERRY) KDE plot
-        # KDEplot(obs)
+        KDEplot(obs)
         training_set = obs[:self.num_training]
         test_set = obs[-self.num_test:]
         training_state_path = state_path[:self.num_training]
@@ -51,10 +50,10 @@ class CrossValidation:
             path, _, _ = self.model.viterbi_robust(training_set, self.model.initial_dist, self.model.A, np.array(B))
             rate = np.sum(path == training_state_path)/len(training_state_path)
 
-            # plot(training_set, ylabel = "Simulated Observations", name = "Bayes_Original_Observations", bayesian=True)
-            # plot(training_state_path, ylabel = "Simulated Hidden States", name = "Bayes_Original_States",bayesian=True)
-            # plot(path, ylabel = "Estimated Hidden States", name = "Bayes_Viterbi_Path", bayesian=True)
-            # plot_mu(chain=self.model.chain, num_states=self.model.num_states, num_iter=num_iter)
+            plot(training_set, ylabel = "Simulated Observations", name = "Bayes_Original_Observations", bayesian=True)
+            plot(training_state_path, ylabel = "Simulated Hidden States", name = "Bayes_Original_States",bayesian=True)
+            plot(path, ylabel = "Estimated Hidden States", name = "Bayes_Viterbi_Path", bayesian=True)
+            plot_mu(chain=self.model.chain, num_states=self.model.num_states, num_iter=num_iter)
 
 
         else:
@@ -70,10 +69,9 @@ class CrossValidation:
             self.sim_emis = sim_emis
             self.sim_init = sim_init
 
-            # plot(path, ylabel = "Estimated Hidden States", name = "Max_Viterbi_Path",bayesian=False)
+            plot(path, ylabel = "Estimated Hidden States", name = "Max_Viterbi_Path",bayesian=False)
 
-        
-        # print("Training Rate:", rate)
+
         return rate, state_path, test_set, test_state_path
 
     def test(self, state_path, test_set, test_state_path):
@@ -87,8 +85,8 @@ class CrossValidation:
             rate = np.sum(test_path == state_path[-self.num_test:])/self.num_test
 
 
-            # plot(test_state_path, ylabel="Simulated Hidden States", name="Bayes_Test_States", bayesian=True)
-            # plot(test_path, ylabel="Estimated Hidden States", name="Bayes_Viterbi_Test_Path", bayesian=True)
+            plot(test_state_path, ylabel="Simulated Hidden States", name="Bayes_Test_States", bayesian=True)
+            plot(test_path, ylabel="Estimated Hidden States", name="Bayes_Viterbi_Test_Path", bayesian=True)
 
 
         else:
@@ -96,8 +94,8 @@ class CrossValidation:
             test_path, _, _ = self.model.viterbi_robust(test_set, self.sim_init, self.sim_tran, self.sim_emis)
             rate = np.sum(test_path == state_path[-self.num_test])/self.num_test
 
-            # plot(test_state_path, ylabel="Simulated Hidden States", name="Max_Test_States", bayesian=False)
-            # plot(test_path, ylabel="Estimated Hidden States", name="Max_Viterbi_Test_Path", bayesian=False)
+            plot(test_state_path, ylabel="Simulated Hidden States", name="Max_Test_States", bayesian=False)
+            plot(test_path, ylabel="Estimated Hidden States", name="Max_Viterbi_Test_Path", bayesian=False)
 
 
         # print("Test Rate:", rate)
