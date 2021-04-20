@@ -12,19 +12,17 @@ if __name__ == "__main__":
     test_maxlik = np.array([None] * cv_iter)
 
     num_training = 1000
-    num_test = 200
+    num_test = 1000
 
-    bayesian = False
+    bayesian = True
     if bayesian == True:
         num_iter = 100
         num_burnin = 100
 
         for i in range(cv_iter):
 
-            model = CrossValidation(bayesian = bayesian)
-            rate, state_path, test_set, test_state_path = model.train(num_training=num_training,
-                                                                      num_test=num_test,
-                                                                      num_iter=num_iter,
+            model = CrossValidation(bayesian=bayesian, num_training=num_training, num_test=num_test)
+            rate, state_path, test_set, test_state_path = model.train(num_iter=num_iter,
                                                                       num_burnin=num_burnin)
             train_bayesian[i] = rate
             test_bayesian[i] = model.test(state_path, test_set, test_state_path)
