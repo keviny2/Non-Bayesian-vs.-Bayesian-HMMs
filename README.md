@@ -1,6 +1,6 @@
 # STAT-520A-Project
 
-[See report here](report/final_report.pdf)
+### [Final report](report/final_report.pdf)
 
 ## Proposal
 
